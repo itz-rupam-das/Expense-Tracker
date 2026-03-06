@@ -1,0 +1,49 @@
+.summary-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    animation: slideInUp 0.5s ease both;
+}
+
+.summary-card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.summary-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-card-label {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.summary-card-value {
+    font-size: var(--font-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.summary-card-trend {
+    font-size: var(--font-xs);
+    font-weight: 600;
+}
+
+.summary-card-trend.up {
+    color: var(--color-danger);
+}
+
+.summary-card-trend.down {
+    color: var(--color-success);
+}

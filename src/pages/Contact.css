@@ -1,0 +1,120 @@
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: var(--spacing-lg);
+    align-items: start;
+}
+
+/* Developer Card */
+.developer-card {
+    text-align: center;
+    animation: slideInUp 0.5s ease both;
+}
+
+.dev-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto var(--spacing-lg);
+}
+
+.dev-name {
+    font-size: var(--font-xl);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.dev-role {
+    font-size: var(--font-sm);
+    color: var(--color-primary-light);
+    margin-bottom: var(--spacing-md);
+}
+
+.dev-desc {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-lg);
+}
+
+.dev-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.dev-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-sm);
+    transition: all var(--transition-fast);
+}
+
+.dev-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-primary-light);
+}
+
+/* Contact Form */
+.contact-form-card {
+    animation: slideInUp 0.5s ease 100ms both;
+}
+
+.contact-form-card .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon svg {
+    position: absolute;
+    left: 12px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.input-with-icon .input-field {
+    padding-left: 38px;
+}
+
+.contact-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.contact-submit {
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--spacing-sm);
+}
+
+.success-message {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--color-success);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    margin-bottom: var(--spacing-md);
+    animation: scaleIn 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+}
