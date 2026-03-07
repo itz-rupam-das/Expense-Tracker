@@ -3,6 +3,14 @@ import { useExpenses } from '../context/ExpenseContext';
 import { Plus, Pencil, Trash2, X, Check, Filter } from 'lucide-react';
 import './Wallet.css';
 
+function getLocalDate() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export default function Wallet() {
     const { expenses, settings, addExpense, editExpense, deleteExpense } = useExpenses();
     const sym = settings.currencySymbol;
@@ -14,7 +22,7 @@ export default function Wallet() {
     const [formData, setFormData] = useState({
         amount: '',
         category: settings.categories[0] || 'Food',
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDate(),
         note: '',
     });
 
@@ -22,7 +30,7 @@ export default function Wallet() {
         setFormData({
             amount: '',
             category: settings.categories[0] || 'Food',
-            date: new Date().toISOString().split('T')[0],
+            date: getLocalDate(),
             note: '',
         });
         setShowForm(false);

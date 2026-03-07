@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { Save, Plus, X, Trash2, AlertTriangle } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Save, Plus, X, Trash2, AlertTriangle, Sun, Moon } from 'lucide-react';
 import './Settings.css';
 
 export default function Settings() {
     const { settings, updateSettings, clearAll } = useExpenses();
+    const { theme, toggleTheme } = useTheme();
 
     const [dailyLimit, setDailyLimit] = useState(settings.dailyLimit);
     const [currency, setCurrency] = useState(settings.currency);
@@ -61,6 +63,34 @@ export default function Settings() {
             <p className="page-subtitle">Configure your preferences</p>
 
             <div className="settings-grid">
+                {/* Theme Toggle */}
+                <div className="settings-card glass-card theme-card">
+                    <h3 className="section-title">Appearance</h3>
+                    <div className="theme-toggle-row">
+                        <div className="theme-info">
+                            <span className="theme-label">
+                                {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                                {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                            </span>
+                            <span className="theme-desc">
+                                Switch between light and dark themes
+                            </span>
+                        </div>
+                        <button
+                            className="theme-toggle-btn"
+                            onClick={toggleTheme}
+                            id="theme-toggle-btn"
+                            aria-label="Toggle theme"
+                        >
+                            <span className={`toggle-track ${theme}`}>
+                                <span className="toggle-thumb">
+                                    {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} />}
+                                </span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
                 {/* Daily Limit & Currency */}
                 <div className="settings-card glass-card">
                     <h3 className="section-title">Spending Limit & Currency</h3>

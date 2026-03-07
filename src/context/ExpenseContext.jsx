@@ -62,9 +62,16 @@ function expenseReducer(state, action) {
     }
 }
 
-// ---- Helper date functions ----
+// ---- Helper date functions (local timezone) ----
+function toLocalDateStr(d) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 function getToday() {
-    return new Date().toISOString().split('T')[0];
+    return toLocalDateStr(new Date());
 }
 
 function getStartOfWeek() {
@@ -72,12 +79,12 @@ function getStartOfWeek() {
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(d.setDate(diff));
-    return monday.toISOString().split('T')[0];
+    return toLocalDateStr(monday);
 }
 
 function getStartOfMonth() {
     const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+    return toLocalDateStr(new Date(d.getFullYear(), d.getMonth(), 1));
 }
 
 // ---- Context Provider ----
@@ -155,7 +162,7 @@ export function ExpenseProvider({ children }) {
         for (let i = days - 1; i >= 0; i--) {
             const d = new Date();
             d.setDate(d.getDate() - i);
-            const key = d.toISOString().split('T')[0];
+            const key = toLocalDateStr(d);
             data[key] = 0;
         }
         state.expenses.forEach((e) => {

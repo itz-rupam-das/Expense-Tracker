@@ -1,6 +1,6 @@
 import './SummaryCard.css';
 
-export default function SummaryCard({ icon: Icon, label, value, trend, trendUp, gradient, delay = 0 }) {
+export default function SummaryCard({ icon: Icon, label, value, trend, trendUp, gradient, delay = 0, valueColor, emoji }) {
     return (
         <div
             className="summary-card glass-card"
@@ -11,7 +11,15 @@ export default function SummaryCard({ icon: Icon, label, value, trend, trendUp, 
             </div>
             <div className="summary-card-content">
                 <span className="summary-card-label">{label}</span>
-                <span className="summary-card-value">{value}</span>
+                <div className="summary-card-value-row">
+                    <span
+                        className="summary-card-value"
+                        style={valueColor ? { color: valueColor } : undefined}
+                    >
+                        {value}
+                    </span>
+                    {emoji && <span className="summary-card-emoji">{emoji}</span>}
+                </div>
                 {trend !== undefined && (
                     <span className={`summary-card-trend ${trendUp ? 'up' : 'down'}`}>
                         {trendUp ? '↑' : '↓'} {trend}

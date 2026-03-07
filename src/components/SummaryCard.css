@@ -28,11 +28,23 @@
     font-weight: 500;
 }
 
+.summary-card-value-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
 .summary-card-value {
     font-size: var(--font-2xl);
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.5px;
+}
+
+.summary-card-emoji {
+    font-size: 1.5rem;
+    line-height: 1;
+    animation: scaleIn 0.4s ease both;
 }
 
 .summary-card-trend {

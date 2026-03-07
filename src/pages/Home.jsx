@@ -49,6 +49,31 @@ export default function Home() {
 
     const sym = settings.currencySymbol;
 
+    // Compute remaining limit color and emoji
+    const limit = settings.dailyLimit;
+    let remainingColor;
+    let remainingEmoji;
+
+    if (remaining >= limit) {
+        remainingColor = '#34d399'; // green
+        remainingEmoji = '😄';
+    } else if (remaining >= limit * 0.6) {
+        remainingColor = '#34d399'; // green
+        remainingEmoji = '🙂';
+    } else if (remaining >= limit * 0.4) {
+        remainingColor = '#fbbf24'; // yellow
+        remainingEmoji = '😐';
+    } else if (remaining >= limit * 0.2) {
+        remainingColor = '#f97316'; // orange
+        remainingEmoji = '😟';
+    } else if (remaining >= 0) {
+        remainingColor = '#f97316'; // orange-red
+        remainingEmoji = '😢';
+    } else {
+        remainingColor = '#f87171'; // red
+        remainingEmoji = '😭';
+    }
+
     // Weekly bar chart
     const weeklyChartData = {
         labels: Object.keys(dailyData).map((d) => {
@@ -129,7 +154,8 @@ export default function Home() {
                     font: { size: 12 },
                     padding: 16,
                     usePointStyle: true,
-                    pointStyleWidth: 10,
+                    pointStyle: 'circle',
+                    pointStyleWidth: 8,
                 },
             },
             tooltip: {
@@ -183,6 +209,8 @@ export default function Home() {
                     value={`${sym}${remaining.toLocaleString()}`}
                     gradient={remaining < 0 ? 'var(--gradient-danger)' : 'var(--gradient-success)'}
                     delay={300}
+                    valueColor={remainingColor}
+                    emoji={remainingEmoji}
                 />
             </div>
 

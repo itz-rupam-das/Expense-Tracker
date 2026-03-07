@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, TrendingUp, Calendar, PieChart } from 'lucide-react';
 import './Reports.css';
 
 ChartJS.register(
@@ -50,7 +50,7 @@ export default function Reports() {
         padding: 12,
     };
 
-    // Daily Line Chart
+    // Daily Line Chart (unchanged)
     const dailyChartData = {
         labels: Object.keys(dailyData).map((d) => {
             const date = new Date(d);
@@ -100,23 +100,97 @@ export default function Reports() {
         },
     };
 
-    // Weekly Bar Chart
+    // Weekly Bar Chart — Horizontal with gradient coloring (Change 7: unique look)
     const weeklyChartData = {
         labels: Object.keys(weeklyData),
         datasets: [
             {
                 label: 'Weekly Spending',
                 data: Object.values(weeklyData),
-                backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(168, 85, 247, 0.7)',
+                    'rgba(192, 132, 252, 0.7)',
+                ],
+                borderColor: [
+                    'rgba(99, 102, 241, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(168, 85, 247, 1)',
+                    'rgba(192, 132, 252, 1)',
+                ],
                 borderWidth: 2,
-                borderRadius: 6,
+                borderRadius: 8,
                 borderSkipped: false,
             },
         ],
     };
 
-    const barOptions = {
+    const weeklyBarOptions = {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                ...commonTooltip,
+                callbacks: { label: (ctx) => `${sym}${ctx.raw.toLocaleString()}` },
+            },
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: {
+                    color: '#64748b',
+                    font: { size: 11 },
+                    callback: (val) => `${sym}${val}`,
+                },
+            },
+            y: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { size: 10 } },
+            },
+        },
+    };
+
+    // Monthly Bar Chart — Vertical with distinct teal/emerald gradient (Change 7: unique look)
+    const monthlyChartData = {
+        labels: Object.keys(monthlyData),
+        datasets: [
+            {
+                label: 'Monthly Spending',
+                data: Object.values(monthlyData),
+                backgroundColor: Object.keys(monthlyData).map((_, i) => {
+                    const colors = [
+                        'rgba(6, 182, 212, 0.6)',
+                        'rgba(20, 184, 166, 0.6)',
+                        'rgba(16, 185, 129, 0.6)',
+                        'rgba(52, 211, 153, 0.6)',
+                        'rgba(110, 231, 183, 0.6)',
+                        'rgba(167, 243, 208, 0.6)',
+                    ];
+                    return colors[i % colors.length];
+                }),
+                borderColor: Object.keys(monthlyData).map((_, i) => {
+                    const colors = [
+                        'rgba(6, 182, 212, 1)',
+                        'rgba(20, 184, 166, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(52, 211, 153, 1)',
+                        'rgba(110, 231, 183, 1)',
+                        'rgba(167, 243, 208, 1)',
+                    ];
+                    return colors[i % colors.length];
+                }),
+                borderWidth: 2,
+                borderRadius: { topLeft: 12, topRight: 12 },
+                borderSkipped: 'bottom',
+                barPercentage: 0.6,
+            },
+        ],
+    };
+
+    const monthlyBarOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -129,7 +203,7 @@ export default function Reports() {
         scales: {
             x: {
                 grid: { display: false },
-                ticks: { color: '#64748b', font: { size: 10 } },
+                ticks: { color: '#64748b', font: { size: 11 } },
             },
             y: {
                 grid: { color: 'rgba(255,255,255,0.04)' },
@@ -142,23 +216,7 @@ export default function Reports() {
         },
     };
 
-    // Monthly Bar Chart
-    const monthlyChartData = {
-        labels: Object.keys(monthlyData),
-        datasets: [
-            {
-                label: 'Monthly Spending',
-                data: Object.values(monthlyData),
-                backgroundColor: 'rgba(16, 185, 129, 0.6)',
-                borderColor: 'rgba(16, 185, 129, 1)',
-                borderWidth: 2,
-                borderRadius: 6,
-                borderSkipped: false,
-            },
-        ],
-    };
-
-    // Category Pie Chart
+    // Category Pie Chart (Change 2: fix circle shape)
     const categoryLabels = Object.keys(categoryBreakdown);
     const categoryValues = Object.values(categoryBreakdown);
 
@@ -185,7 +243,8 @@ export default function Reports() {
                     font: { size: 12 },
                     padding: 16,
                     usePointStyle: true,
-                    pointStyleWidth: 10,
+                    pointStyle: 'circle',
+                    pointStyleWidth: 8,
                 },
             },
             tooltip: {
@@ -205,7 +264,7 @@ export default function Reports() {
             <div className="reports-grid">
                 <div className="report-card glass-card">
                     <h3 className="section-title">
-                        <BarChart3 size={20} /> Daily Spending (Last 7 Days)
+                        <TrendingUp size={20} /> Daily Spending (Last 7 Days)
                     </h3>
                     <div className="report-chart-wrapper">
                         <Line data={dailyChartData} options={lineOptions} />
@@ -217,22 +276,22 @@ export default function Reports() {
                         <BarChart3 size={20} /> Weekly Spending (Last 4 Weeks)
                     </h3>
                     <div className="report-chart-wrapper">
-                        <Bar data={weeklyChartData} options={barOptions} />
+                        <Bar data={weeklyChartData} options={weeklyBarOptions} />
                     </div>
                 </div>
 
                 <div className="report-card glass-card">
                     <h3 className="section-title">
-                        <BarChart3 size={20} /> Monthly Spending (Last 6 Months)
+                        <Calendar size={20} /> Monthly Spending (Last 6 Months)
                     </h3>
                     <div className="report-chart-wrapper">
-                        <Bar data={monthlyChartData} options={barOptions} />
+                        <Bar data={monthlyChartData} options={monthlyBarOptions} />
                     </div>
                 </div>
 
                 <div className="report-card glass-card">
                     <h3 className="section-title">
-                        <BarChart3 size={20} /> Category Breakdown
+                        <PieChart size={20} /> Category Breakdown
                     </h3>
                     <div className="report-chart-wrapper pie-chart-wrapper">
                         {categoryLabels.length > 0 ? (

@@ -1,17 +1,20 @@
 .wallet-header {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: var(--spacing-md);
 }
 
 .wallet-header .page-subtitle {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
 }
 
 .add-expense-btn {
-    flex-shrink: 0;
+    padding: 0.85rem 2.5rem;
+    font-size: var(--font-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 /* Form Modal */

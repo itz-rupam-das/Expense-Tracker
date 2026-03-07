@@ -1,65 +1,132 @@
-.notification-toast {
+/* Notification Popup Overlay */
+.notification-overlay {
     position: fixed;
-    top: calc(var(--navbar-height) + var(--spacing-md));
-    right: var(--spacing-md);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-    background: rgba(239, 68, 68, 0.12);
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    animation: fadeIn 0.2s ease;
+    padding: var(--spacing-md);
+}
+
+/* Popup Card */
+.notification-popup {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl) var(--spacing-xl);
     max-width: 420px;
-    z-index: 2000;
-    animation: toastSlide 0.4s ease;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    width: 100%;
+    text-align: center;
+    animation: scaleIn 0.3s ease;
+    box-shadow: 0 8px 40px rgba(239, 68, 68, 0.15), var(--shadow-lg);
 }
 
-.notification-icon {
+/* Warning Icon */
+.notification-popup-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-lg);
     color: var(--color-danger);
-    flex-shrink: 0;
-    margin-top: 2px;
+    animation: pulse 2s ease-in-out infinite;
 }
 
-.notification-content {
-    flex: 1;
+/* Title */
+.notification-popup-title {
+    font-size: var(--font-xl);
+    font-weight: 700;
+    color: var(--color-danger);
+    margin-bottom: var(--spacing-sm);
 }
 
-.notification-content strong {
-    display: block;
+/* Message */
+.notification-popup-message {
     font-size: var(--font-sm);
-    color: var(--color-danger);
-    margin-bottom: 4px;
-}
-
-.notification-content p {
-    font-size: var(--font-xs);
     color: var(--text-secondary);
-    margin: 0;
-    line-height: 1.5;
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.6;
 }
 
-.notification-close {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: var(--radius-sm);
-    flex-shrink: 0;
-    transition: all var(--transition-fast);
+.notification-exceed-amount {
+    font-weight: 700;
+    color: var(--color-danger);
+    font-size: var(--font-md);
 }
 
-.notification-close:hover {
+/* Detail Rows */
+.notification-popup-details {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.notification-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-xs) 0;
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+.notification-detail-row + .notification-detail-row {
+    border-top: 1px solid var(--border-color);
+    margin-top: var(--spacing-xs);
+    padding-top: var(--spacing-sm);
+}
+
+.notification-detail-value {
+    font-weight: 600;
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
 }
 
+.notification-detail-value.danger {
+    color: var(--color-danger);
+}
+
+/* Got It Button */
+.notification-gotit-btn {
+    background: var(--gradient-danger);
+    color: white;
+    border: none;
+    padding: 0.75rem 2.5rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    width: 100%;
+}
+
+.notification-gotit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+}
+
+.notification-gotit-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
 @media (max-width: 480px) {
-    .notification-toast {
-        left: var(--spacing-sm);
-        right: var(--spacing-sm);
-        max-width: none;
+    .notification-popup {
+        padding: var(--spacing-xl) var(--spacing-lg);
+        margin: var(--spacing-sm);
     }
 }

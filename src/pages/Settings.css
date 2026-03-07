@@ -1,3 +1,83 @@
+/* Theme Toggle */
+.theme-card {
+    grid-column: 1 / -1;
+}
+
+.theme-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+}
+
+.theme-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.theme-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: 600;
+    font-size: var(--font-md);
+    color: var(--text-primary);
+}
+
+.theme-desc {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+}
+
+.theme-toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-track {
+    display: flex;
+    align-items: center;
+    width: 56px;
+    height: 30px;
+    border-radius: var(--radius-full);
+    padding: 3px;
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.toggle-track.dark {
+    background: var(--gradient-primary);
+}
+
+.toggle-track.light {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+.toggle-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-track.dark .toggle-thumb {
+    transform: translateX(26px);
+    color: #6366f1;
+}
+
+.toggle-track.light .toggle-thumb {
+    transform: translateX(0);
+    color: #f59e0b;
+}
+
 .settings-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
