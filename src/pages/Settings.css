@@ -203,6 +203,62 @@
     gap: var(--spacing-sm);
 }
 
+/* Settings description text */
+.settings-desc {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Category Budgets (Change 9) */
+.budget-inputs-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.budget-input-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.budget-cat-label {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+.budget-input {
+    max-width: 160px;
+}
+
+/* Backup & Restore (Change 8) */
+.backup-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-md);
+}
+
+.import-confirm {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-sm);
+    animation: scaleIn 0.2s ease;
+}
+
+.import-error {
+    font-size: var(--font-sm);
+    color: var(--color-danger);
+    margin: var(--spacing-sm) 0;
+}
+
 @media (max-width: 768px) {
     .settings-grid {
         grid-template-columns: 1fr;
@@ -210,5 +266,18 @@
 
     .danger-zone {
         grid-column: 1;
+    }
+
+    .backup-actions {
+        flex-direction: column;
+    }
+
+    .budget-input-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .budget-input {
+        max-width: 100%;
     }
 }

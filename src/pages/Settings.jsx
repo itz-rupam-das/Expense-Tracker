@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useTheme } from '../context/ThemeContext';
-import { Save, Plus, X, Trash2, AlertTriangle, Sun, Moon } from 'lucide-react';
+import { Save, Plus, X, Trash2, AlertTriangle, Sun, Moon, Download, Upload } from 'lucide-react';
 import './Settings.css';
 
 export default function Settings() {
-    const { settings, updateSettings, clearAll } = useExpenses();
+    const { settings, expenses, updateSettings, clearAll, importData } = useExpenses();
     const { theme, toggleTheme } = useTheme();
 
     const [dailyLimit, setDailyLimit] = useState(settings.dailyLimit);
@@ -13,6 +13,14 @@ export default function Settings() {
     const [newCategory, setNewCategory] = useState('');
     const [saved, setSaved] = useState(false);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
+    const [showImportConfirm, setShowImportConfirm] = useState(false);
+    const [importFile, setImportFile] = useState(null);
+    const [importError, setImportError] = useState('');
+    const [importSuccess, setImportSuccess] = useState(false);
+    const fileInputRef = useRef(null);
+
+    // Category budgets state
+    const [categoryBudgets, setCategoryBudgets] = useState(settings.categoryBudgets || {});
 
     const currencyOptions = [
         { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
@@ -32,6 +40,19 @@ export default function Settings() {
         setTimeout(() => setSaved(false), 3000);
     };
 
+    const handleSaveBudgets = () => {
+        updateSettings({ categoryBudgets });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+    };
+
+    const handleBudgetChange = (cat, value) => {
+        setCategoryBudgets((prev) => ({
+            ...prev,
+            [cat]: Number(value) || 0,
+        }));
+    };
+
     const handleAddCategory = () => {
         const trimmed = newCategory.trim();
         if (trimmed && !settings.categories.includes(trimmed)) {
@@ -46,13 +67,79 @@ export default function Settings() {
         updateSettings({
             categories: settings.categories.filter((c) => c !== cat),
         });
+        // Also remove budget for that category
+        const newBudgets = { ...categoryBudgets };
+        delete newBudgets[cat];
+        setCategoryBudgets(newBudgets);
     };
 
     const handleClearAll = () => {
         clearAll();
         setDailyLimit(500);
         setCurrency('INR');
+        setCategoryBudgets({});
         setShowClearConfirm(false);
+    };
+
+    // Backup: Export JSON
+    const handleExportJSON = () => {
+        const data = {
+            expenses,
+            settings,
+            exportedAt: new Date().toISOString(),
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const d = new Date();
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        link.download = `expense_tracker_backup_${dateStr}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // Restore: Import JSON
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImportFile(file);
+            setShowImportConfirm(true);
+            setImportError('');
+        }
+    };
+
+    const handleImportJSON = () => {
+        if (!importFile) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data.expenses || !Array.isArray(data.expenses)) {
+                    setImportError('Invalid backup file: missing expenses array.');
+                    return;
+                }
+                importData(data);
+                setDailyLimit(data.settings?.dailyLimit || 500);
+                setCurrency(data.settings?.currency || 'INR');
+                setCategoryBudgets(data.settings?.categoryBudgets || {});
+                setShowImportConfirm(false);
+                setImportFile(null);
+                setImportSuccess(true);
+                setTimeout(() => setImportSuccess(false), 4000);
+            } catch (err) {
+                setImportError('Failed to parse backup file. Please ensure it is a valid JSON file.');
+            }
+        };
+        reader.readAsText(importFile);
+    };
+
+    const cancelImport = () => {
+        setShowImportConfirm(false);
+        setImportFile(null);
+        setImportError('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     return (
@@ -138,6 +225,34 @@ export default function Settings() {
                     </button>
                 </div>
 
+                {/* Category Budgets (Change 9) */}
+                <div className="settings-card glass-card">
+                    <h3 className="section-title">Category Budgets (Monthly)</h3>
+                    <p className="settings-desc">Set monthly spending limits for individual categories.</p>
+
+                    <div className="budget-inputs-list">
+                        {settings.categories.map((cat) => (
+                            <div key={cat} className="budget-input-row">
+                                <span className="budget-cat-label">{cat}</span>
+                                <input
+                                    type="number"
+                                    className="input-field budget-input"
+                                    placeholder="No limit"
+                                    value={categoryBudgets[cat] || ''}
+                                    onChange={(e) => handleBudgetChange(cat, e.target.value)}
+                                    min="0"
+                                    step="100"
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <button className="btn-primary" onClick={handleSaveBudgets} id="save-budgets-btn">
+                        <Save size={16} />
+                        Save Budgets
+                    </button>
+                </div>
+
                 {/* Category Management */}
                 <div className="settings-card glass-card">
                     <h3 className="section-title">Manage Categories</h3>
@@ -172,6 +287,60 @@ export default function Settings() {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Data Backup & Restore (Change 8) */}
+                <div className="settings-card glass-card">
+                    <h3 className="section-title">Data Backup & Restore</h3>
+                    <p className="settings-desc">
+                        Export your data as a JSON backup or restore from a previous backup file.
+                    </p>
+
+                    {importSuccess && (
+                        <div className="save-success">
+                            ✅ Data imported successfully!
+                        </div>
+                    )}
+
+                    <div className="backup-actions">
+                        <button className="btn-primary" onClick={handleExportJSON} id="export-json-btn">
+                            <Download size={16} />
+                            Export Data (JSON)
+                        </button>
+                        <button
+                            className="btn-secondary"
+                            onClick={() => fileInputRef.current?.click()}
+                            id="import-json-btn"
+                        >
+                            <Upload size={16} />
+                            Import Data (JSON)
+                        </button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            accept=".json"
+                            onChange={handleFileSelect}
+                            style={{ display: 'none' }}
+                        />
+                    </div>
+
+                    {/* Import Confirmation Dialog */}
+                    {showImportConfirm && (
+                        <div className="import-confirm">
+                            <p className="confirm-text">
+                                ⚠️ Importing will <strong>replace all existing data</strong>. Are you sure?
+                            </p>
+                            {importError && <p className="import-error">{importError}</p>}
+                            <div className="confirm-buttons">
+                                <button className="btn-secondary" onClick={cancelImport}>
+                                    Cancel
+                                </button>
+                                <button className="btn-danger" onClick={handleImportJSON} id="confirm-import-btn">
+                                    Yes, Import & Replace
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Danger Zone */}

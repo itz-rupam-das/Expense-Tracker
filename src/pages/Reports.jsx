@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
-import { BarChart3, TrendingUp, Calendar, PieChart } from 'lucide-react';
+import { BarChart3, TrendingUp, Calendar, PieChart, Download, Lightbulb, Scale } from 'lucide-react';
 import './Reports.css';
 
 ChartJS.register(
@@ -31,14 +31,40 @@ const chartColors = [
     'rgba(168, 85, 247, 0.8)',
 ];
 
+function getLocalDate() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export default function Reports() {
-    const { settings, getDailyData, getWeeklyData, getMonthlyData, getCategoryBreakdown } = useExpenses();
+    const {
+        expenses,
+        settings,
+        formatCurrency,
+        getDailyData,
+        getWeeklyData,
+        getMonthlyData,
+        getCategoryBreakdown,
+        getCategoryMonthlySpending,
+        getIncomeVsExpenseMonthly,
+        getInsights,
+    } = useExpenses();
     const sym = settings.currencySymbol;
 
     const dailyData = getDailyData(7);
     const weeklyData = getWeeklyData(4);
     const monthlyData = getMonthlyData(6);
     const categoryBreakdown = getCategoryBreakdown();
+    const incomeVsExpense = getIncomeVsExpenseMonthly(6);
+    const insights = getInsights();
+
+    const hasDailyData = Object.values(dailyData).some((v) => v > 0);
+    const hasWeeklyData = Object.values(weeklyData).some((v) => v > 0);
+    const hasMonthlyData = Object.values(monthlyData).some((v) => v > 0);
+    const hasIncomeOrExpense = incomeVsExpense.incomeData.some((v) => v > 0) || incomeVsExpense.expenseData.some((v) => v > 0);
 
     const commonTooltip = {
         backgroundColor: 'rgba(17, 24, 39, 0.95)',
@@ -50,10 +76,10 @@ export default function Reports() {
         padding: 12,
     };
 
-    // Daily Line Chart (unchanged)
+    // Daily Line Chart
     const dailyChartData = {
         labels: Object.keys(dailyData).map((d) => {
-            const date = new Date(d);
+            const date = new Date(d + 'T00:00:00');
             return date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
         }),
         datasets: [
@@ -81,7 +107,7 @@ export default function Reports() {
             legend: { display: false },
             tooltip: {
                 ...commonTooltip,
-                callbacks: { label: (ctx) => `${sym}${ctx.raw.toLocaleString()}` },
+                callbacks: { label: (ctx) => formatCurrency(ctx.raw) },
             },
         },
         scales: {
@@ -100,7 +126,7 @@ export default function Reports() {
         },
     };
 
-    // Weekly Bar Chart — Horizontal with gradient coloring (Change 7: unique look)
+    // Weekly Bar Chart — Horizontal
     const weeklyChartData = {
         labels: Object.keys(weeklyData),
         datasets: [
@@ -134,7 +160,7 @@ export default function Reports() {
             legend: { display: false },
             tooltip: {
                 ...commonTooltip,
-                callbacks: { label: (ctx) => `${sym}${ctx.raw.toLocaleString()}` },
+                callbacks: { label: (ctx) => formatCurrency(ctx.raw) },
             },
         },
         scales: {
@@ -153,7 +179,7 @@ export default function Reports() {
         },
     };
 
-    // Monthly Bar Chart — Vertical with distinct teal/emerald gradient (Change 7: unique look)
+    // Monthly Bar Chart
     const monthlyChartData = {
         labels: Object.keys(monthlyData),
         datasets: [
@@ -197,7 +223,7 @@ export default function Reports() {
             legend: { display: false },
             tooltip: {
                 ...commonTooltip,
-                callbacks: { label: (ctx) => `${sym}${ctx.raw.toLocaleString()}` },
+                callbacks: { label: (ctx) => formatCurrency(ctx.raw) },
             },
         },
         scales: {
@@ -216,7 +242,7 @@ export default function Reports() {
         },
     };
 
-    // Category Pie Chart (Change 2: fix circle shape)
+    // Category Pie Chart
     const categoryLabels = Object.keys(categoryBreakdown);
     const categoryValues = Object.values(categoryBreakdown);
 
@@ -249,17 +275,176 @@ export default function Reports() {
             },
             tooltip: {
                 ...commonTooltip,
-                callbacks: { label: (ctx) => ` ${ctx.label}: ${sym}${ctx.raw.toLocaleString()}` },
+                callbacks: { label: (ctx) => ` ${ctx.label}: ${formatCurrency(ctx.raw)}` },
             },
         },
     };
 
+    // Income vs Expense Chart (Change 5)
+    const incomeVsExpenseChart = {
+        labels: incomeVsExpense.labels,
+        datasets: [
+            {
+                label: 'Income',
+                data: incomeVsExpense.incomeData,
+                backgroundColor: 'rgba(52, 211, 153, 0.6)',
+                borderColor: 'rgba(52, 211, 153, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+            {
+                label: 'Expenses',
+                data: incomeVsExpense.expenseData,
+                backgroundColor: 'rgba(248, 113, 113, 0.6)',
+                borderColor: 'rgba(248, 113, 113, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+        ],
+    };
+
+    const incomeVsExpenseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#94a3b8',
+                    font: { size: 12 },
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                },
+            },
+            tooltip: {
+                ...commonTooltip,
+                callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` },
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: {
+                    color: '#64748b',
+                    font: { size: 11 },
+                    callback: (val) => `${sym}${val}`,
+                },
+            },
+        },
+    };
+
+    // Budget vs Actual Chart (Change 11)
+    const budgets = settings.categoryBudgets || {};
+    const monthlySpending = getCategoryMonthlySpending();
+    const budgetCategories = Object.entries(budgets).filter(([, b]) => b > 0);
+    const hasBudgets = budgetCategories.length > 0;
+
+    const budgetVsActualChart = hasBudgets ? {
+        labels: budgetCategories.map(([cat]) => cat),
+        datasets: [
+            {
+                label: 'Budget',
+                data: budgetCategories.map(([, b]) => b),
+                backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                borderColor: 'rgba(20, 184, 166, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+            {
+                label: 'Actual',
+                data: budgetCategories.map(([cat]) => monthlySpending[cat] || 0),
+                backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                borderColor: 'rgba(245, 158, 11, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+        ],
+    } : null;
+
+    const budgetVsActualOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#94a3b8',
+                    font: { size: 12 },
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                },
+            },
+            tooltip: {
+                ...commonTooltip,
+                callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` },
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: {
+                    color: '#64748b',
+                    font: { size: 11 },
+                    callback: (val) => `${sym}${val}`,
+                },
+            },
+        },
+    };
+
+    // CSV export
+    const exportCSV = () => {
+        const expensesOnly = expenses.filter((e) => (e.type || 'expense') === 'expense');
+        const headers = ['Date', 'Category', 'Amount', 'Type', 'Notes'];
+        const rows = expensesOnly.map((e) => [
+            e.date,
+            e.category,
+            e.amount,
+            e.type || 'expense',
+            `"${(e.note || '').replace(/"/g, '""')}"`,
+        ]);
+        const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `report_${getLocalDate()}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="page-container" id="reports-page">
-            <h1 className="page-title">
-                <span className="gradient-text">Reports</span>
-            </h1>
-            <p className="page-subtitle">Detailed spending analytics and trends</p>
+            <div className="reports-header">
+                <div>
+                    <h1 className="page-title">
+                        <span className="gradient-text">Reports</span>
+                    </h1>
+                    <p className="page-subtitle">Detailed spending analytics and trends</p>
+                </div>
+                <button className="btn-secondary export-csv-btn" onClick={exportCSV} id="reports-export-csv">
+                    <Download size={16} /> Export CSV
+                </button>
+            </div>
+
+            {/* Insights (Change 10) */}
+            <div className="insights-card glass-card">
+                <h3 className="section-title">
+                    <Lightbulb size={20} /> Spending Insights
+                </h3>
+                <div className="insights-list">
+                    {insights.map((insight, i) => (
+                        <div key={i} className="insight-item">{insight}</div>
+                    ))}
+                </div>
+            </div>
 
             <div className="reports-grid">
                 <div className="report-card glass-card">
@@ -267,7 +452,13 @@ export default function Reports() {
                         <TrendingUp size={20} /> Daily Spending (Last 7 Days)
                     </h3>
                     <div className="report-chart-wrapper">
-                        <Line data={dailyChartData} options={lineOptions} />
+                        {hasDailyData ? (
+                            <Line data={dailyChartData} options={lineOptions} />
+                        ) : (
+                            <div className="empty-chart">
+                                <p>No daily spending data yet.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -276,7 +467,13 @@ export default function Reports() {
                         <BarChart3 size={20} /> Weekly Spending (Last 4 Weeks)
                     </h3>
                     <div className="report-chart-wrapper">
-                        <Bar data={weeklyChartData} options={weeklyBarOptions} />
+                        {hasWeeklyData ? (
+                            <Bar data={weeklyChartData} options={weeklyBarOptions} />
+                        ) : (
+                            <div className="empty-chart">
+                                <p>No weekly spending data yet.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -285,7 +482,13 @@ export default function Reports() {
                         <Calendar size={20} /> Monthly Spending (Last 6 Months)
                     </h3>
                     <div className="report-chart-wrapper">
-                        <Bar data={monthlyChartData} options={monthlyBarOptions} />
+                        {hasMonthlyData ? (
+                            <Bar data={monthlyChartData} options={monthlyBarOptions} />
+                        ) : (
+                            <div className="empty-chart">
+                                <p>No monthly spending data yet.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -303,6 +506,34 @@ export default function Reports() {
                         )}
                     </div>
                 </div>
+
+                {/* Income vs Expense Chart (Change 5) */}
+                <div className="report-card glass-card">
+                    <h3 className="section-title">
+                        <Scale size={20} /> Income vs Expenses (Last 6 Months)
+                    </h3>
+                    <div className="report-chart-wrapper">
+                        {hasIncomeOrExpense ? (
+                            <Bar data={incomeVsExpenseChart} options={incomeVsExpenseOptions} />
+                        ) : (
+                            <div className="empty-chart">
+                                <p>Add income and expenses to see comparison.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Budget vs Actual Chart (Change 11) */}
+                {hasBudgets && (
+                    <div className="report-card glass-card">
+                        <h3 className="section-title">
+                            <BarChart3 size={20} /> Budget vs Actual (This Month)
+                        </h3>
+                        <div className="report-chart-wrapper">
+                            <Bar data={budgetVsActualChart} options={budgetVsActualOptions} />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

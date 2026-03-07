@@ -10,7 +10,7 @@ import {
 import { Bar, Pie } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
 import SummaryCard from '../components/SummaryCard';
-import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight, Wallet, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
@@ -30,22 +30,29 @@ const chartColors = [
 export default function Home() {
     const {
         settings,
+        formatCurrency,
         getTodayTotal,
         getWeeklyTotal,
         getMonthlyTotal,
         getRemainingLimit,
+        getNetBalance,
         getRecentExpenses,
         getDailyData,
         getCategoryBreakdown,
+        getCategoryMonthlySpending,
+        getInsights,
     } = useExpenses();
 
     const todayTotal = getTodayTotal();
     const weeklyTotal = getWeeklyTotal();
     const monthlyTotal = getMonthlyTotal();
     const remaining = getRemainingLimit();
+    const netBalance = getNetBalance();
     const recentExpenses = getRecentExpenses(5);
     const dailyData = getDailyData(7);
     const categoryBreakdown = getCategoryBreakdown();
+    const categoryMonthly = getCategoryMonthlySpending();
+    const insights = getInsights();
 
     const sym = settings.currencySymbol;
 
@@ -74,10 +81,13 @@ export default function Home() {
         remainingEmoji = '😭';
     }
 
+    // Check if daily data has any spending
+    const hasDailySpending = Object.values(dailyData).some((v) => v > 0);
+
     // Weekly bar chart
     const weeklyChartData = {
         labels: Object.keys(dailyData).map((d) => {
-            const date = new Date(d);
+            const date = new Date(d + 'T00:00:00');
             return date.toLocaleDateString('en-US', { weekday: 'short' });
         }),
         datasets: [
@@ -107,7 +117,7 @@ export default function Home() {
                 cornerRadius: 8,
                 padding: 12,
                 callbacks: {
-                    label: (ctx) => `${sym}${ctx.raw.toLocaleString()}`,
+                    label: (ctx) => formatCurrency(ctx.raw),
                 },
             },
         },
@@ -167,11 +177,15 @@ export default function Home() {
                 cornerRadius: 8,
                 padding: 12,
                 callbacks: {
-                    label: (ctx) => ` ${ctx.label}: ${sym}${ctx.raw.toLocaleString()}`,
+                    label: (ctx) => ` ${ctx.label}: ${formatCurrency(ctx.raw)}`,
                 },
             },
         },
     };
+
+    // Category budget progress bars
+    const budgets = settings.categoryBudgets || {};
+    const budgetCategories = Object.entries(budgets).filter(([, b]) => b > 0);
 
     return (
         <div className="page-container" id="home-page">
@@ -185,32 +199,40 @@ export default function Home() {
                 <SummaryCard
                     icon={DollarSign}
                     label="Today's Spending"
-                    value={`${sym}${todayTotal.toLocaleString()}`}
+                    value={formatCurrency(todayTotal)}
                     gradient="var(--gradient-primary)"
                     delay={0}
                 />
                 <SummaryCard
                     icon={TrendingUp}
                     label="This Week"
-                    value={`${sym}${weeklyTotal.toLocaleString()}`}
+                    value={formatCurrency(weeklyTotal)}
                     gradient="var(--gradient-accent)"
                     delay={100}
                 />
                 <SummaryCard
                     icon={Calendar}
                     label="This Month"
-                    value={`${sym}${monthlyTotal.toLocaleString()}`}
+                    value={formatCurrency(monthlyTotal)}
                     gradient="var(--gradient-info)"
                     delay={200}
                 />
                 <SummaryCard
                     icon={ShieldCheck}
                     label="Remaining Limit"
-                    value={`${sym}${remaining.toLocaleString()}`}
+                    value={formatCurrency(remaining)}
                     gradient={remaining < 0 ? 'var(--gradient-danger)' : 'var(--gradient-success)'}
                     delay={300}
                     valueColor={remainingColor}
                     emoji={remainingEmoji}
+                />
+                <SummaryCard
+                    icon={Wallet}
+                    label="Net Balance"
+                    value={formatCurrency(netBalance)}
+                    gradient={netBalance >= 0 ? 'var(--gradient-success)' : 'var(--gradient-danger)'}
+                    delay={400}
+                    valueColor={netBalance >= 0 ? '#34d399' : '#f87171'}
                 />
             </div>
 
@@ -219,7 +241,16 @@ export default function Home() {
                 <div className="chart-card glass-card">
                     <h3 className="section-title">Weekly Spending</h3>
                     <div className="chart-wrapper">
-                        <Bar data={weeklyChartData} options={barOptions} />
+                        {hasDailySpending ? (
+                            <Bar data={weeklyChartData} options={barOptions} />
+                        ) : (
+                            <div className="empty-chart">
+                                <p>No spending data this week</p>
+                                <Link to="/wallet" className="btn-primary">
+                                    Add Expense <ArrowRight size={16} />
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -237,6 +268,51 @@ export default function Home() {
                             </div>
                         )}
                     </div>
+                </div>
+            </div>
+
+            {/* Category Budget Progress (Change 9) */}
+            {budgetCategories.length > 0 && (
+                <div className="budget-section glass-card">
+                    <h3 className="section-title">Category Budgets (This Month)</h3>
+                    <div className="budget-list">
+                        {budgetCategories.map(([cat, budget]) => {
+                            const spent = categoryMonthly[cat] || 0;
+                            const pct = Math.min((spent / budget) * 100, 100);
+                            const isOver = spent > budget;
+                            const isNear = spent >= budget * 0.8;
+                            return (
+                                <div key={cat} className="budget-item">
+                                    <div className="budget-item-header">
+                                        <span className="budget-cat-name">{cat}</span>
+                                        <span className={`budget-amount ${isOver ? 'over' : isNear ? 'near' : ''}`}>
+                                            {formatCurrency(spent)} / {formatCurrency(budget)}
+                                        </span>
+                                    </div>
+                                    <div className="budget-bar-bg">
+                                        <div
+                                            className={`budget-bar-fill ${isOver ? 'over' : isNear ? 'near' : ''}`}
+                                            style={{ width: `${pct}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Spending Insights (Change 10) */}
+            <div className="insights-section glass-card">
+                <h3 className="section-title">
+                    <Lightbulb size={20} /> Spending Insights
+                </h3>
+                <div className="insights-list">
+                    {insights.map((insight, i) => (
+                        <div key={i} className="insight-item">
+                            {insight}
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -260,24 +336,40 @@ export default function Home() {
                                     <div
                                         className="recent-category-dot"
                                         style={{
-                                            background: chartColors[
+                                            background: (expense.type || 'expense') === 'income'
+                                                ? '#34d399'
+                                                : chartColors[
                                                 settings.categories.indexOf(expense.category) % chartColors.length
-                                            ],
+                                                ],
                                         }}
                                     />
                                     <div>
-                                        <span className="recent-item-category">{expense.category}</span>
+                                        <span className="recent-item-category">
+                                            {expense.category}
+                                            {expense.type === 'income' && (
+                                                <span className="income-badge">Income</span>
+                                            )}
+                                            {expense.recurring && (
+                                                <span className="recurring-badge">🔄</span>
+                                            )}
+                                        </span>
                                         {expense.note && (
                                             <span className="recent-item-note">{expense.note}</span>
                                         )}
                                     </div>
                                 </div>
                                 <div className="recent-item-right">
-                                    <span className="recent-item-amount">
+                                    <span
+                                        className="recent-item-amount"
+                                        style={{
+                                            color: (expense.type || 'expense') === 'income' ? '#34d399' : undefined,
+                                        }}
+                                    >
+                                        {(expense.type || 'expense') === 'income' ? '+' : '-'}
                                         {sym}{Number(expense.amount).toLocaleString()}
                                     </span>
                                     <span className="recent-item-date">
-                                        {new Date(expense.date).toLocaleDateString('en-US', {
+                                        {new Date(expense.date + 'T00:00:00').toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
                                         })}

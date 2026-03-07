@@ -1,0 +1,23 @@
+{
+    "name": "Personal Expense Tracker",
+    "short_name": "ExpenseTracker",
+    "description": "Track, analyze, and manage your daily spending with interactive charts and spending limit alerts.",
+    "start_url": "/Expense-Tracker/",
+    "scope": "/Expense-Tracker/",
+    "display": "standalone",
+    "background_color": "#0a0e1a",
+    "theme_color": "#8b5cf6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "finance",
+        "utilities"
+    ]
+}
