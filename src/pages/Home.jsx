@@ -10,7 +10,7 @@ import {
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
 import SummaryCard from '../components/SummaryCard';
-import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight, Wallet, Lightbulb } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
@@ -237,7 +237,7 @@ export default function Home() {
                     emoji={remainingEmoji}
                 />
                 <SummaryCard
-                    icon={Wallet}
+                    icon={() => <img src="/Expense-Tracker/logo.png" alt="Net Balance Logo" style={{ width: '22px', height: '22px', borderRadius: '4px' }} />}
                     label="Net Balance"
                     value={formatCurrency(netBalance)}
                     gradient={netBalance >= 0 ? 'var(--gradient-success)' : 'var(--gradient-danger)'}

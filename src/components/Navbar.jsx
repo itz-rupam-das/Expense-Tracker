@@ -1,76 +1,30 @@
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Wallet, BarChart3, Mail, Settings, Menu, X, TrendingDown, LogOut } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/wallet', label: 'Wallet', icon: Wallet },
-    { path: '/reports', label: 'Reports', icon: BarChart3 },
-    { path: '/contact', label: 'Contact', icon: Mail },
-    { path: '/settings', label: 'Settings', icon: Settings },
-];
-
 export default function Navbar() {
-    const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const location = useLocation();
     const { signOut } = useAuth();
 
-    const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
-    const closeMobile = () => setIsMobileOpen(false);
-
-    const handleLogout = async () => {
-        closeMobile();
-        await signOut();
-    };
-
     return (
-        <>
-            <nav className="navbar" id="main-navbar">
-                <div className="navbar-inner">
-                    <NavLink to="/" className="navbar-logo" onClick={closeMobile}>
-                        <div className="logo-icon">
-                            <TrendingDown size={22} />
-                        </div>
-                        <span className="logo-text">Expense<span className="logo-accent">Tracker</span></span>
-                    </NavLink>
-
-                    <div className={`navbar-links ${isMobileOpen ? 'open' : ''}`}>
-                        {navItems.map((item) => (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                                onClick={closeMobile}
-                                end={item.path === '/'}
-                            >
-                                <item.icon size={18} />
-                                <span>{item.label}</span>
-                            </NavLink>
-                        ))}
-                        <button
-                            className="nav-link logout-btn"
-                            onClick={handleLogout}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', color: 'inherit', font: 'inherit', padding: 0 }}
-                        >
-                            <LogOut size={18} />
-                            <span>Logout</span>
-                        </button>
+        <nav className="navbar" id="main-navbar">
+            <div className="navbar-inner">
+                <NavLink to="/" className="navbar-logo">
+                    <div className="logo-icon">
+                        <img src="/Expense-Tracker/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
                     </div>
+                    <span className="logo-text">Expense<span className="logo-accent">Tracker</span></span>
+                </NavLink>
 
-                    <button
-                        className="navbar-toggle"
-                        onClick={toggleMobile}
-                        aria-label="Toggle navigation"
-                        id="navbar-toggle-btn"
-                    >
-                        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+                <div className="navbar-actions">
+                    <NavLink to="/settings" className="nav-action-btn" aria-label="Settings">
+                        <Settings size={22} />
+                    </NavLink>
+                    <button onClick={signOut} className="nav-action-btn logout-action-btn" aria-label="Logout">
+                        <LogOut size={22} />
                     </button>
                 </div>
-            </nav>
-
-            {isMobileOpen && <div className="navbar-overlay" onClick={closeMobile} />}
-        </>
+            </div>
+        </nav>
     );
 }

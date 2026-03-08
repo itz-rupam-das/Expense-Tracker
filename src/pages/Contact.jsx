@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Mail, MessageSquare, Send, Github, Linkedin, Instagram } from 'lucide-react';
-import profileImg from '/pic-rupam-insta.jpeg';
 import './Contact.css';
 
 export default function Contact() {
@@ -39,7 +38,7 @@ export default function Contact() {
                 {/* Developer Info */}
                 <div className="developer-card glass-card">
                     <div className="dev-avatar">
-                        <img src={profileImg} alt="Rupam Das" className="dev-avatar-img" />
+                        <img src="/Expense-Tracker/pic-rupam-insta.jpeg" alt="Rupam Das" className="dev-avatar-img" />
                     </div>
                     <h3 className="dev-name">Rupam Das</h3>
                     <p className="dev-role">BCA Student — MAKAUT</p>

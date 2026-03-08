@@ -1,0 +1,78 @@
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(10, 14, 26, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-color);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-inner {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 70px;
+    max-width: 600px;
+    /* Keeps the buttons grouped elegantly on large screens */
+    margin: 0 auto;
+    position: relative;
+    padding: 0 0.5rem;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    flex: 1;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item.active {
+    color: var(--color-primary-light);
+}
+
+.bottom-nav-item.active svg {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+}
+
+.center-btn-wrapper {
+    flex: 1.2;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.center-add-btn {
+    position: absolute;
+    bottom: 15px;
+    /* Floats out of the nav container slightly */
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    z-index: 1001;
+}
+
+.center-add-btn:hover {
+    transform: scale(1.08) translateY(-4px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    color: white;
+}

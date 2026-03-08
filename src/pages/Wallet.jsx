@@ -199,7 +199,13 @@ export default function Wallet() {
             if (dateTo && e.date > dateTo) return false;
             return true;
         })
-        .sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id));
+        .reverse() // Newest entries first (fallback for same dates)
+        .sort((a, b) => {
+            const dateDiff = new Date(b.date) - new Date(a.date);
+            if (dateDiff !== 0) return dateDiff;
+            if (b.created_at && a.created_at) return new Date(b.created_at) - new Date(a.created_at);
+            return 0;
+        });
 
     const totalFiltered = filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
@@ -222,15 +228,7 @@ export default function Wallet() {
                     <p className="page-subtitle">Manage your expenses & income</p>
                 </div>
                 <div className="wallet-header-actions">
-                    <button
-                        className="btn-secondary export-csv-btn"
-                        onClick={exportCSV}
-                        title="Export to CSV"
-                        id="export-csv-btn"
-                    >
-                        <Download size={16} />
-                        Export CSV
-                    </button>
+
                     <button
                         className="btn-primary add-expense-btn"
                         onClick={() => {

@@ -376,7 +376,13 @@ export function ExpenseProvider({ children }) {
 
     const getRecentExpenses = (count = 5) => {
         return [...state.expenses]
-            .sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id))
+            .reverse() // Newest entries first (fallback for same dates)
+            .sort((a, b) => {
+                const dateDiff = new Date(b.date) - new Date(a.date);
+                if (dateDiff !== 0) return dateDiff;
+                if (b.created_at && a.created_at) return new Date(b.created_at) - new Date(a.created_at);
+                return 0;
+            })
             .slice(0, count);
     };
 

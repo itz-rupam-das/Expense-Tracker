@@ -34,6 +34,7 @@ export function AuthProvider({ children }) {
         signUp: (data) => supabase.auth.signUp(data),
         signInWithPassword: (data) => supabase.auth.signInWithPassword(data),
         signInWithGithub: () => supabase.auth.signInWithOAuth({ provider: 'github' }),
+        signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google' }),
         signOut: () => supabase.auth.signOut(),
     };
 

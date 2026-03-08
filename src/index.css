@@ -328,6 +328,8 @@ textarea {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: flex;
+  justify-content: center;
 }
 
 .btn-primary {
@@ -483,6 +485,8 @@ select.input-field option {
   font-size: var(--font-md);
   color: var(--text-secondary);
   margin-bottom: var(--spacing-2xl);
+  display: flex;
+  justify-content: center;
 }
 
 .section-title {

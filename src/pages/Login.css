@@ -20,6 +20,33 @@
     text-align: center;
 }
 
+.login-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+.brand-logo {
+    width: 64px;
+    height: 64px;
+    background: rgba(var(--primary-color-rgb), 0.1);
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.login-brand h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 .login-header h1 {
     font-size: 2rem;
     margin-bottom: 0.5rem;
@@ -51,6 +78,15 @@
     text-align: center;
 }
 
+.login-success {
+    color: var(--success-color, #10b981);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 .login-divider {
     display: flex;
     align-items: center;
@@ -58,6 +94,36 @@
     color: var(--text-secondary);
     font-size: 0.9rem;
     margin: 1rem 0;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper .input-field {
+    padding-right: 2.5rem;
+    /* Make space for the icon */
+    width: 100%;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.password-toggle-btn:hover {
+    color: var(--text-primary);
 }
 
 .login-divider::before,
@@ -76,7 +142,7 @@
 }
 
 .github-btn {
-    background-color: #24292e;
+    background: #24292e;
     color: white;
     border: none;
     display: flex;
@@ -86,7 +152,27 @@
 }
 
 .github-btn:hover {
-    background-color: #1b1f23;
+    background: #1b1f23;
+}
+
+.google-btn {
+    background: #4285F4;
+    color: white;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.google-btn:hover {
+    background: #3367d6;
+}
+
+.google-btn svg {
+    background-color: white;
+    border-radius: 50%;
+    padding: 2px;
 }
 
 .login-footer {

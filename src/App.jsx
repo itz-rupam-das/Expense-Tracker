@@ -4,7 +4,7 @@ import { ExpenseProvider } from './context/ExpenseContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
-import FloatingAddButton from './components/FloatingAddButton';
+import BottomNav from './components/BottomNav';
 import Notification from './components/Notification';
 import Home from './pages/Home';
 import Wallet from './pages/Wallet';
@@ -64,8 +64,7 @@ function AppContent() {
         <div className="app">
             {user && <Navbar />}
             {user && <Notification />}
-            {user && <FloatingAddButton />}
-            <main className={`app-main ${!user ? 'login-layout' : ''}`}>
+            <main className={`app-main ${!user ? 'login-layout' : ''} ${user ? 'with-bottom-nav' : ''}`}>
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
@@ -75,6 +74,7 @@ function AppContent() {
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 </Routes>
             </main>
+            {user && <BottomNav />}
         </div>
     );
 }
