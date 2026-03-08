@@ -1,18 +1,37 @@
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ExpenseProvider } from './context/ExpenseContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import FloatingAddButton from './components/FloatingAddButton';
 import Notification from './components/Notification';
 import Home from './pages/Home';
 import Wallet from './pages/Wallet';
 import Reports from './pages/Reports';
 import Contact from './pages/Contact';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
 import './App.css';
+
+function ProtectedRoute({ children }) {
+    const { user, isLoading } = useAuth();
+
+    if (isLoading) {
+        return <div className="loading-state">Loading...</div>;
+    }
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+}
 
 function AppContent() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const location = useLocation();
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -20,7 +39,7 @@ function AppContent() {
             const tag = e.target.tagName.toLowerCase();
             if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
 
-            if (e.key === 'n' || e.key === 'N') {
+            if (user && (e.key === 'n' || e.key === 'N')) {
                 e.preventDefault();
                 navigate('/wallet');
                 // Small delay to let the page render before triggering the add button
@@ -39,19 +58,21 @@ function AppContent() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [navigate]);
+    }, [navigate, user]);
 
     return (
         <div className="app">
-            <Navbar />
-            <Notification />
-            <main className="app-main">
+            {user && <Navbar />}
+            {user && <Notification />}
+            {user && <FloatingAddButton />}
+            <main className={`app-main ${!user ? 'login-layout' : ''}`}>
                 <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/wallet" element={<Wallet />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                    <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+                    <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                    <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+                    <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 </Routes>
             </main>
         </div>
@@ -60,10 +81,12 @@ function AppContent() {
 
 export default function App() {
     return (
-        <ThemeProvider>
-            <ExpenseProvider>
-                <AppContent />
-            </ExpenseProvider>
-        </ThemeProvider>
+        <AuthProvider>
+            <ThemeProvider>
+                <ExpenseProvider>
+                    <AppContent />
+                </ExpenseProvider>
+            </ThemeProvider>
+        </AuthProvider>
     );
 }

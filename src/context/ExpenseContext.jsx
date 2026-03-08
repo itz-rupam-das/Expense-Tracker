@@ -1,4 +1,6 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
+import { useAuth } from './AuthContext';
 
 const ExpenseContext = createContext();
 
@@ -22,18 +24,23 @@ function loadFromStorage(key, defaultValue) {
 }
 
 const initialState = {
-    expenses: loadFromStorage('et_expenses', []),
+    expenses: [],
     settings: loadFromStorage('et_settings', DEFAULT_SETTINGS),
 };
 
 function expenseReducer(state, action) {
     switch (action.type) {
+        case 'SET_EXPENSES':
+            return {
+                ...state,
+                expenses: action.payload,
+            };
         case 'ADD_EXPENSE':
             return {
                 ...state,
                 expenses: [
                     ...state.expenses,
-                    { ...action.payload, id: Date.now().toString() },
+                    action.payload,
                 ],
             };
         case 'EDIT_EXPENSE':
@@ -66,6 +73,7 @@ function expenseReducer(state, action) {
             };
         case 'CLEAR_ALL':
             return {
+                ...state,
                 expenses: [],
                 settings: DEFAULT_SETTINGS,
             };
@@ -102,80 +110,166 @@ function getStartOfMonth() {
 // ---- Context Provider ----
 export function ExpenseProvider({ children }) {
     const [state, dispatch] = useReducer(expenseReducer, initialState);
+    const [isLoading, setIsLoading] = useState(true);
+    const { user } = useAuth();
+
+    // Fetch initial transactions from Supabase
+    useEffect(() => {
+        async function fetchExpenses() {
+            if (!user) {
+                dispatch({ type: 'SET_EXPENSES', payload: [] });
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                if (error) throw error;
+
+                const mappedData = (data || []).map(item => ({
+                    ...item,
+                    note: item.notes || ''
+                }));
+
+                dispatch({ type: 'SET_EXPENSES', payload: mappedData });
+            } catch (err) {
+                console.error("Error fetching transactions:", err);
+                alert("Failed to load transactions: " + err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchExpenses();
+    }, [user]);
 
     // Ensure settings has categoryBudgets (migration for existing data)
     useEffect(() => {
         if (!state.settings.categoryBudgets) {
             dispatch({ type: 'UPDATE_SETTINGS', payload: { categoryBudgets: {} } });
         }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('et_expenses', JSON.stringify(state.expenses));
-    }, [state.expenses]);
+    }, [state.settings.categoryBudgets]);
 
     useEffect(() => {
         localStorage.setItem('et_settings', JSON.stringify(state.settings));
     }, [state.settings]);
 
-    // Auto-add recurring expenses on mount
-    useEffect(() => {
-        const today = getToday();
-        const recurringExpenses = state.expenses.filter((e) => e.recurring && e.recurrenceFrequency);
+    // Auto-add recurring expenses (simplified for now to avoid side-effects on load,
+    // actual recurring logic would ideally run via a cron job on Supabase)
 
-        recurringExpenses.forEach((expense) => {
-            const lastDate = new Date(expense.date);
-            const now = new Date();
-            let nextDate = new Date(lastDate);
+    const addExpense = async (expense) => {
+        if (!user) return;
+        const dbPayload = {
+            amount: Number(expense.amount),
+            category: expense.category,
+            type: expense.type || 'expense',
+            date: expense.date,
+            notes: expense.note || expense.notes || '',
+            user_id: user.id
+        };
 
-            if (expense.recurrenceFrequency === 'daily') {
-                nextDate.setDate(nextDate.getDate() + 1);
-            } else if (expense.recurrenceFrequency === 'weekly') {
-                nextDate.setDate(nextDate.getDate() + 7);
-            } else if (expense.recurrenceFrequency === 'monthly') {
-                nextDate.setMonth(nextDate.getMonth() + 1);
-            }
+        const { data, error } = await supabase
+            .from('transactions')
+            .insert([dbPayload])
+            .select()
+            .single();
 
-            while (toLocalDateStr(nextDate) <= today && nextDate <= now) {
-                const dateStr = toLocalDateStr(nextDate);
-                const alreadyExists = state.expenses.some(
-                    (e) => e.recurringParentId === expense.id && e.date === dateStr
-                );
-                if (!alreadyExists) {
-                    dispatch({
-                        type: 'ADD_EXPENSE',
-                        payload: {
-                            amount: expense.amount,
-                            category: expense.category,
-                            date: dateStr,
-                            note: expense.note ? `${expense.note} (recurring)` : '(recurring)',
-                            type: expense.type || 'expense',
-                            recurringParentId: expense.id,
-                        },
-                    });
-                }
-                if (expense.recurrenceFrequency === 'daily') {
-                    nextDate.setDate(nextDate.getDate() + 1);
-                } else if (expense.recurrenceFrequency === 'weekly') {
-                    nextDate.setDate(nextDate.getDate() + 7);
-                } else if (expense.recurrenceFrequency === 'monthly') {
-                    nextDate.setMonth(nextDate.getMonth() + 1);
-                }
-            }
-        });
-    }, []); // only on mount
+        if (error) {
+            console.error("Error adding expense:", error);
+            alert("Failed to add transaction: " + error.message);
+            return;
+        }
 
-    const addExpense = (expense) =>
-        dispatch({ type: 'ADD_EXPENSE', payload: expense });
+        const localExpense = {
+            ...data,
+            note: data.notes
+        };
+        dispatch({ type: 'ADD_EXPENSE', payload: localExpense });
+    };
 
-    const editExpense = (expense) =>
-        dispatch({ type: 'EDIT_EXPENSE', payload: expense });
+    const editExpense = async (expense) => {
+        if (!user) return;
 
-    const deleteExpense = (id) =>
+        const dbUpdates = {
+            amount: Number(expense.amount),
+            category: expense.category,
+            type: expense.type || 'expense',
+            date: expense.date,
+            notes: expense.note || expense.notes || ''
+        };
+
+        const { data, error } = await supabase
+            .from('transactions')
+            .update(dbUpdates)
+            .eq('id', expense.id)
+            .eq('user_id', user.id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error updating expense:", error);
+            alert("Failed to update transaction: " + error.message);
+            return;
+        }
+
+        const localExpense = {
+            ...data,
+            note: data.notes
+        };
+        dispatch({ type: 'EDIT_EXPENSE', payload: localExpense });
+    };
+
+    const deleteExpense = async (id) => {
+        if (!user) return;
+
+        const { error } = await supabase
+            .from('transactions')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id);
+
+        if (error) {
+            console.error("Error deleting expense:", error);
+            alert("Failed to delete transaction: " + error.message);
+            return;
+        }
         dispatch({ type: 'DELETE_EXPENSE', payload: id });
+    };
 
-    const restoreExpense = (expense) =>
-        dispatch({ type: 'RESTORE_EXPENSE', payload: expense });
+    const restoreExpense = async (expense) => {
+        if (!user) return;
+
+        const dbPayload = {
+            amount: Number(expense.amount),
+            category: expense.category,
+            type: expense.type || 'expense',
+            date: expense.date,
+            notes: expense.note || expense.notes || '',
+            user_id: user.id
+        };
+
+        const { data, error } = await supabase
+            .from('transactions')
+            .insert([dbPayload])
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error restoring expense:", error);
+            alert("Failed to restore transaction: " + error.message);
+            return;
+        }
+
+        const localExpense = {
+            ...data,
+            note: data.notes
+        };
+        dispatch({ type: 'RESTORE_EXPENSE', payload: localExpense });
+    };
 
     const importData = (data) =>
         dispatch({ type: 'IMPORT_DATA', payload: data });
@@ -183,7 +277,18 @@ export function ExpenseProvider({ children }) {
     const updateSettings = (settings) =>
         dispatch({ type: 'UPDATE_SETTINGS', payload: settings });
 
-    const clearAll = () => dispatch({ type: 'CLEAR_ALL' });
+    const clearAll = async () => {
+        if (!user) return;
+
+        const { error } = await supabase
+            .from('transactions')
+            .delete()
+            .eq('user_id', user.id);
+
+        if (!error) {
+            dispatch({ type: 'CLEAR_ALL' });
+        }
+    };
 
     // ---- Currency formatter ----
     const formatCurrency = (amount) => {
@@ -434,6 +539,7 @@ export function ExpenseProvider({ children }) {
     };
 
     const value = {
+        isLoading,
         expenses: state.expenses,
         settings: state.settings,
         addExpense,

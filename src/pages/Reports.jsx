@@ -10,7 +10,7 @@ import {
     Legend,
     Filler,
 } from 'chart.js';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
 import { BarChart3, TrendingUp, Calendar, PieChart, Download, Lightbulb, Scale } from 'lucide-react';
 import './Reports.css';
@@ -41,6 +41,7 @@ function getLocalDate() {
 
 export default function Reports() {
     const {
+        isLoading,
         expenses,
         settings,
         formatCurrency,
@@ -252,8 +253,8 @@ export default function Reports() {
             {
                 data: categoryValues,
                 backgroundColor: chartColors.slice(0, categoryLabels.length),
-                borderColor: 'rgba(10, 14, 26, 0.8)',
-                borderWidth: 2,
+                borderWidth: 0,
+                hoverOffset: 4,
             },
         ],
     };
@@ -261,6 +262,7 @@ export default function Reports() {
     const pieOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '70%',
         plugins: {
             legend: {
                 position: 'bottom',
@@ -269,8 +271,7 @@ export default function Reports() {
                     font: { size: 12 },
                     padding: 16,
                     usePointStyle: true,
-                    pointStyle: 'circle',
-                    pointStyleWidth: 8,
+                    pointStyle: 'rect', /* Square instead of circle */
                 },
             },
             tooltip: {
@@ -420,6 +421,15 @@ export default function Reports() {
         URL.revokeObjectURL(url);
     };
 
+    if (isLoading) {
+        return (
+            <div className="page-container loading-container">
+                <div className="loader"></div>
+                <p>Loading your reports...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="page-container" id="reports-page">
             <div className="reports-header">
@@ -498,7 +508,7 @@ export default function Reports() {
                     </h3>
                     <div className="report-chart-wrapper pie-chart-wrapper">
                         {categoryLabels.length > 0 ? (
-                            <Pie data={pieData} options={pieOptions} />
+                            <Doughnut data={pieData} options={pieOptions} />
                         ) : (
                             <div className="empty-chart">
                                 <p>No data available yet. Add expenses to see category breakdown.</p>

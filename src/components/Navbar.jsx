@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Wallet, BarChart3, Mail, Settings, Menu, X, TrendingDown } from 'lucide-react';
+import { Home, Wallet, BarChart3, Mail, Settings, Menu, X, TrendingDown, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const navItems = [
@@ -14,46 +15,62 @@ const navItems = [
 export default function Navbar() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const location = useLocation();
+    const { signOut } = useAuth();
 
     const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
     const closeMobile = () => setIsMobileOpen(false);
 
+    const handleLogout = async () => {
+        closeMobile();
+        await signOut();
+    };
+
     return (
-        <nav className="navbar" id="main-navbar">
-            <div className="navbar-inner">
-                <NavLink to="/" className="navbar-logo" onClick={closeMobile}>
-                    <div className="logo-icon">
-                        <TrendingDown size={22} />
-                    </div>
-                    <span className="logo-text">Expense<span className="logo-accent">Tracker</span></span>
-                </NavLink>
+        <>
+            <nav className="navbar" id="main-navbar">
+                <div className="navbar-inner">
+                    <NavLink to="/" className="navbar-logo" onClick={closeMobile}>
+                        <div className="logo-icon">
+                            <TrendingDown size={22} />
+                        </div>
+                        <span className="logo-text">Expense<span className="logo-accent">Tracker</span></span>
+                    </NavLink>
 
-                <div className={`navbar-links ${isMobileOpen ? 'open' : ''}`}>
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                            onClick={closeMobile}
-                            end={item.path === '/'}
+                    <div className={`navbar-links ${isMobileOpen ? 'open' : ''}`}>
+                        {navItems.map((item) => (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                                onClick={closeMobile}
+                                end={item.path === '/'}
+                            >
+                                <item.icon size={18} />
+                                <span>{item.label}</span>
+                            </NavLink>
+                        ))}
+                        <button
+                            className="nav-link logout-btn"
+                            onClick={handleLogout}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', color: 'inherit', font: 'inherit', padding: 0 }}
                         >
-                            <item.icon size={18} />
-                            <span>{item.label}</span>
-                        </NavLink>
-                    ))}
-                </div>
+                            <LogOut size={18} />
+                            <span>Logout</span>
+                        </button>
+                    </div>
 
-                <button
-                    className="navbar-toggle"
-                    onClick={toggleMobile}
-                    aria-label="Toggle navigation"
-                    id="navbar-toggle-btn"
-                >
-                    {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-            </div>
+                    <button
+                        className="navbar-toggle"
+                        onClick={toggleMobile}
+                        aria-label="Toggle navigation"
+                        id="navbar-toggle-btn"
+                    >
+                        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
+            </nav>
 
             {isMobileOpen && <div className="navbar-overlay" onClick={closeMobile} />}
-        </nav>
+        </>
     );
 }

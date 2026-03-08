@@ -7,7 +7,7 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
 import SummaryCard from '../components/SummaryCard';
 import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight, Wallet, Lightbulb } from 'lucide-react';
@@ -29,6 +29,7 @@ const chartColors = [
 
 export default function Home() {
     const {
+        isLoading,
         settings,
         formatCurrency,
         getTodayTotal,
@@ -147,8 +148,8 @@ export default function Home() {
             {
                 data: categoryValues,
                 backgroundColor: chartColors.slice(0, categoryLabels.length),
-                borderColor: 'rgba(10, 14, 26, 0.8)',
-                borderWidth: 2,
+                borderWidth: 0,
+                hoverOffset: 4,
             },
         ],
     };
@@ -156,6 +157,7 @@ export default function Home() {
     const pieOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '70%',
         plugins: {
             legend: {
                 position: 'bottom',
@@ -164,8 +166,7 @@ export default function Home() {
                     font: { size: 12 },
                     padding: 16,
                     usePointStyle: true,
-                    pointStyle: 'circle',
-                    pointStyleWidth: 8,
+                    pointStyle: 'rect', /* Square instead of circle */
                 },
             },
             tooltip: {
@@ -186,6 +187,15 @@ export default function Home() {
     // Category budget progress bars
     const budgets = settings.categoryBudgets || {};
     const budgetCategories = Object.entries(budgets).filter(([, b]) => b > 0);
+
+    if (isLoading) {
+        return (
+            <div className="page-container loading-container">
+                <div className="loader"></div>
+                <p>Loading your dashboard...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="page-container" id="home-page">
@@ -258,7 +268,7 @@ export default function Home() {
                     <h3 className="section-title">Category Breakdown</h3>
                     <div className="chart-wrapper pie-wrapper">
                         {categoryLabels.length > 0 ? (
-                            <Pie data={pieData} options={pieOptions} />
+                            <Doughnut data={pieData} options={pieOptions} />
                         ) : (
                             <div className="empty-chart">
                                 <p>No expenses yet</p>
@@ -387,6 +397,7 @@ export default function Home() {
                     </div>
                 )}
             </div>
+
         </div>
     );
 }
