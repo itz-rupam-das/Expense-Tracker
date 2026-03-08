@@ -123,22 +123,33 @@ export function ExpenseProvider({ children }) {
             }
 
             try {
-                const { data, error } = await supabase
-                    .from('transactions')
-                    .select('*')
-                    .eq('user_id', user.id);
+                // Fetch transactions and settings in parallel
+                const [txResponse, settingsResponse] = await Promise.all([
+                    supabase.from('transactions').select('*').eq('user_id', user.id),
+                    supabase.from('user_settings').select('daily_limit').eq('user_id', user.id).maybeSingle()
+                ]);
 
-                if (error) throw error;
+                if (txResponse.error) throw txResponse.error;
 
-                const mappedData = (data || []).map(item => ({
+                const mappedData = (txResponse.data || []).map(item => ({
                     ...item,
                     note: item.notes || ''
                 }));
 
                 dispatch({ type: 'SET_EXPENSES', payload: mappedData });
+
+                // If settings exist in DB, merge them into local state
+                if (settingsResponse.data) {
+                    dispatch({
+                        type: 'UPDATE_SETTINGS',
+                        payload: { dailyLimit: Number(settingsResponse.data.daily_limit) }
+                    });
+                } else if (settingsResponse.error) {
+                    console.error("Error fetching settings:", settingsResponse.error);
+                }
             } catch (err) {
-                console.error("Error fetching transactions:", err);
-                alert("Failed to load transactions: " + err.message);
+                console.error("Error fetching data:", err);
+                alert("Failed to load data: " + err.message);
             } finally {
                 setIsLoading(false);
             }
@@ -274,8 +285,28 @@ export function ExpenseProvider({ children }) {
     const importData = (data) =>
         dispatch({ type: 'IMPORT_DATA', payload: data });
 
-    const updateSettings = (settings) =>
+    const updateSettings = async (settings) => {
+        // Optimistically update local state
         dispatch({ type: 'UPDATE_SETTINGS', payload: settings });
+
+        // If dailyLimit is being updated, sync it to Supabase
+        if (user && settings.dailyLimit !== undefined) {
+            try {
+                const { error } = await supabase
+                    .from('user_settings')
+                    .upsert({
+                        user_id: user.id,
+                        daily_limit: Number(settings.dailyLimit)
+                    }, { onConflict: 'user_id' });
+
+                if (error) throw error;
+            } catch (err) {
+                console.error("Error saving settings to DB:", err);
+                // We don't necessarily need to alert on every tiny settings save failure,
+                // but logging it is important.
+            }
+        }
+    };
 
     const clearAll = async () => {
         if (!user) return;
