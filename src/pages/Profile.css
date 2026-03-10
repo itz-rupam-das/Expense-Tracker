@@ -1,0 +1,200 @@
+.profile-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* User Card */
+.user-card {
+    text-align: center;
+    animation: slideInUp 0.5s ease both;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: var(--spacing-xl);
+}
+
+.edit-profile-btn {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.edit-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.user-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--gradient-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-email {
+    font-size: var(--font-xl);
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.user-member-email {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.user-bio-display {
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    max-width: 400px;
+    color: var(--text-secondary);
+    font-size: var(--font-md);
+    line-height: 1.6;
+}
+
+.empty-bio {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.user-member {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-xl);
+    margin-top: auto;
+}
+
+.logout-btn-large {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    margin-top: var(--spacing-lg);
+}
+
+.logout-btn-large:hover {
+    background: var(--color-danger);
+    color: white;
+}
+
+/* Edit Form */
+.profile-edit-form {
+    width: 100%;
+    text-align: left;
+    animation: fadeIn 0.3s ease both;
+}
+
+.edit-title {
+    font-size: var(--font-lg);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    color: var(--color-primary-light);
+}
+
+.profile-edit-form .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.bio-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.avatar-upload-container {
+    margin-top: var(--spacing-xs);
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    font-size: var(--font-sm);
+    white-space: nowrap;
+}
+
+.upload-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cropper-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+
+.img-to-crop {
+    max-height: 50vh;
+    border-radius: var(--radius-sm);
+}
+
+.cropper-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    width: 100%;
+    margin-top: var(--spacing-md);
+}
+
+.cropper-actions button {
+    flex: 1;
+    justify-content: center;
+}
+
+.preview-top-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.edit-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.edit-actions button {
+    flex: 1;
+    justify-content: center;
+}

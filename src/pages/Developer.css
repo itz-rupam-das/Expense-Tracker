@@ -1,4 +1,4 @@
-.contact-grid {
+.developer-grid {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
     gap: var(--spacing-lg);
@@ -82,23 +82,6 @@
     margin-bottom: var(--spacing-md);
 }
 
-.input-with-icon {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-with-icon svg {
-    position: absolute;
-    left: 12px;
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.input-with-icon .input-field {
-    padding-left: 38px;
-}
-
 .contact-textarea {
     resize: vertical;
     min-height: 120px;
@@ -110,19 +93,35 @@
     margin-top: var(--spacing-sm);
 }
 
-.success-message {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: var(--color-success);
+.status-message {
     padding: var(--spacing-md);
     border-radius: var(--radius-sm);
     font-size: var(--font-sm);
+    font-weight: 500;
     margin-bottom: var(--spacing-md);
-    animation: scaleIn 0.3s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.status-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-message.info {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-info);
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 @media (max-width: 768px) {
-    .contact-grid {
+    .developer-grid {
         grid-template-columns: 1fr;
     }
 }

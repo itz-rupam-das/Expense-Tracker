@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Wallet, Plus, BarChart3, Mail } from 'lucide-react';
+import { Home, Wallet, Plus, BarChart3, User } from 'lucide-react';
 import './BottomNav.css';
 
 export default function BottomNav() {
@@ -27,9 +27,9 @@ export default function BottomNav() {
                     <span>Wallet</span>
                 </NavLink>
 
-                <NavLink to="/contact" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-                    <Mail size={22} />
-                    <span>Contact</span>
+                <NavLink to="/profile" className={({ isActive }) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
+                    <User size={22} />
+                    <span>Profile</span>
                 </NavLink>
             </div>
         </nav>

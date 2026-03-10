@@ -1,6 +1,6 @@
 import './SummaryCard.css';
 
-export default function SummaryCard({ icon: Icon, label, value, trend, trendUp, gradient, delay = 0, valueColor, emoji }) {
+export default function SummaryCard({ icon: Icon, label, value, trend, trendUp, gradient, delay = 0, valueColor, emoji, progress, progressColor }) {
     return (
         <div
             className="summary-card glass-card"
@@ -24,6 +24,14 @@ export default function SummaryCard({ icon: Icon, label, value, trend, trendUp, 
                     <span className={`summary-card-trend ${trendUp ? 'up' : 'down'}`}>
                         {trendUp ? '↑' : '↓'} {trend}
                     </span>
+                )}
+                {progress !== undefined && (
+                    <div className="summary-card-progress-bg">
+                        <div
+                            className="summary-card-progress-fill"
+                            style={{ width: `${Math.min(100, Math.max(0, progress))}%`, backgroundColor: progressColor }}
+                        ></div>
+                    </div>
                 )}
             </div>
         </div>

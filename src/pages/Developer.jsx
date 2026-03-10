@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Mail, MessageSquare, Send, Github, Linkedin, Instagram } from 'lucide-react';
-import './Contact.css';
+import './Developer.css';
 
-export default function Contact() {
+export default function Developer() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -16,25 +16,24 @@ export default function Contact() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Send email via mailto (Change 4)
         const subject = encodeURIComponent(`Expense Tracker Feedback from ${formData.name}`);
         const body = encodeURIComponent(
             `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
         );
-        window.open(`mailto:hallabolgaming@gmail.com?subject=${subject}&body=${body}`, '_blank');
+        window.open(`mailto:rdas40978@gmail.com?subject=${subject}&body=${body}`, '_blank');
         setSubmitted(true);
         setFormData({ name: '', email: '', message: '' });
         setTimeout(() => setSubmitted(false), 4000);
     };
 
     return (
-        <div className="page-container" id="contact-page">
+        <div className="page-container" id="developer-page">
             <h1 className="page-title">
-                <span className="gradient-text">Contact</span>
+                <span className="gradient-text">Developer Profile</span>
             </h1>
-            <p className="page-subtitle">Get in touch with the developer</p>
+            <p className="page-subtitle">Get in touch with the creator</p>
 
-            <div className="contact-grid">
+            <div className="developer-grid">
                 {/* Developer Info */}
                 <div className="developer-card glass-card">
                     <div className="dev-avatar">
@@ -48,9 +47,9 @@ export default function Contact() {
                     </p>
 
                     <div className="dev-links">
-                        <a href="mailto:rdas4098@gmail.com" className="dev-link" aria-label="Email">
+                        <a href="mailto:rdas40978@gmail.com" className="dev-link" aria-label="Email">
                             <Mail size={18} />
-                            <span>rdas4098@gmail.com</span>
+                            <span>rdas40978@gmail.com</span>
                         </a>
                         <a href="https://github.com/itz-rupam-das" target="_blank" rel="noopener noreferrer" className="dev-link" aria-label="GitHub">
                             <Github size={18} />

@@ -5,13 +5,16 @@ import { useAuth } from './AuthContext';
 const ExpenseContext = createContext();
 
 const DEFAULT_CATEGORIES = ['Food', 'Travel', 'Bills', 'Shopping', 'Entertainment', 'Health', 'Education', 'Other'];
+const DEFAULT_INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
 
 const DEFAULT_SETTINGS = {
     dailyLimit: 500,
     currency: 'INR',
     currencySymbol: '₹',
     categories: DEFAULT_CATEGORIES,
+    incomeCategories: DEFAULT_INCOME_CATEGORIES,
     categoryBudgets: {},
+    userProfile: { name: '', avatarUrl: '', bio: '' }
 };
 
 function loadFromStorage(key, defaultValue) {
@@ -126,7 +129,7 @@ export function ExpenseProvider({ children }) {
                 // Fetch transactions and settings in parallel
                 const [txResponse, settingsResponse] = await Promise.all([
                     supabase.from('transactions').select('*').eq('user_id', user.id),
-                    supabase.from('user_settings').select('daily_limit').eq('user_id', user.id).maybeSingle()
+                    supabase.from('user_settings').select('daily_limit, name, avatar_url, bio').eq('user_id', user.id).maybeSingle()
                 ]);
 
                 if (txResponse.error) throw txResponse.error;
@@ -142,7 +145,14 @@ export function ExpenseProvider({ children }) {
                 if (settingsResponse.data) {
                     dispatch({
                         type: 'UPDATE_SETTINGS',
-                        payload: { dailyLimit: Number(settingsResponse.data.daily_limit) }
+                        payload: {
+                            dailyLimit: Number(settingsResponse.data.daily_limit),
+                            userProfile: {
+                                name: settingsResponse.data.name || '',
+                                avatarUrl: settingsResponse.data.avatar_url || '',
+                                bio: settingsResponse.data.bio || ''
+                            }
+                        }
                     });
                 } else if (settingsResponse.error) {
                     console.error("Error fetching settings:", settingsResponse.error);
@@ -158,12 +168,22 @@ export function ExpenseProvider({ children }) {
         fetchExpenses();
     }, [user]);
 
-    // Ensure settings has categoryBudgets (migration for existing data)
+    // Ensure settings has categoryBudgets and incomeCategories (migration for existing data)
     useEffect(() => {
+        let updates = {};
         if (!state.settings.categoryBudgets) {
-            dispatch({ type: 'UPDATE_SETTINGS', payload: { categoryBudgets: {} } });
+            updates.categoryBudgets = {};
         }
-    }, [state.settings.categoryBudgets]);
+        if (!state.settings.incomeCategories) {
+            updates.incomeCategories = DEFAULT_INCOME_CATEGORIES;
+        }
+        if (!state.settings.userProfile) {
+            updates.userProfile = { name: '', avatarUrl: '', bio: '' };
+        }
+        if (Object.keys(updates).length > 0) {
+            dispatch({ type: 'UPDATE_SETTINGS', payload: updates });
+        }
+    }, [state.settings.categoryBudgets, state.settings.incomeCategories, state.settings.userProfile]);
 
     useEffect(() => {
         localStorage.setItem('et_settings', JSON.stringify(state.settings));
@@ -289,21 +309,34 @@ export function ExpenseProvider({ children }) {
         // Optimistically update local state
         dispatch({ type: 'UPDATE_SETTINGS', payload: settings });
 
-        // If dailyLimit is being updated, sync it to Supabase
-        if (user && settings.dailyLimit !== undefined) {
+        // Determine merged state for Supabase update
+        const mergedSettings = { ...state.settings, ...settings };
+
+        // Sync settings to Supabase
+        if (user) {
             try {
+                const dbPayload = {
+                    user_id: user.id
+                };
+
+                if (mergedSettings.dailyLimit !== undefined) {
+                    dbPayload.daily_limit = Number(mergedSettings.dailyLimit);
+                }
+
+                if (mergedSettings.userProfile) {
+                    dbPayload.name = mergedSettings.userProfile.name || '';
+                    dbPayload.avatar_url = mergedSettings.userProfile.avatarUrl || '';
+                    dbPayload.bio = mergedSettings.userProfile.bio || '';
+                }
+
                 const { error } = await supabase
                     .from('user_settings')
-                    .upsert({
-                        user_id: user.id,
-                        daily_limit: Number(settings.dailyLimit)
-                    }, { onConflict: 'user_id' });
+                    .upsert(dbPayload, { onConflict: 'user_id' });
 
                 if (error) throw error;
             } catch (err) {
                 console.error("Error saving settings to DB:", err);
-                // We don't necessarily need to alert on every tiny settings save failure,
-                // but logging it is important.
+                // Logging silently to not disrupt UX
             }
         }
     };

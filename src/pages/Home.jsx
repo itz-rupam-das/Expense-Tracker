@@ -10,7 +10,7 @@ import {
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { useExpenses } from '../context/ExpenseContext';
 import SummaryCard from '../components/SummaryCard';
-import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight, Lightbulb } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, ShieldCheck, ArrowRight, Lightbulb, Scale } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
@@ -57,29 +57,25 @@ export default function Home() {
 
     const sym = settings.currencySymbol;
 
-    // Compute remaining limit color and emoji
+    // Compute remaining limit color and progress
     const limit = settings.dailyLimit;
+    const spentToday = todayTotal;
+    const progressPct = limit > 0 ? (spentToday / limit) * 100 : 0;
+
     let remainingColor;
-    let remainingEmoji;
 
     if (remaining >= limit) {
         remainingColor = '#34d399'; // green
-        remainingEmoji = '😄';
     } else if (remaining >= limit * 0.6) {
         remainingColor = '#34d399'; // green
-        remainingEmoji = '🙂';
     } else if (remaining >= limit * 0.4) {
         remainingColor = '#fbbf24'; // yellow
-        remainingEmoji = '😐';
     } else if (remaining >= limit * 0.2) {
         remainingColor = '#f97316'; // orange
-        remainingEmoji = '😟';
     } else if (remaining >= 0) {
         remainingColor = '#f97316'; // orange-red
-        remainingEmoji = '😢';
     } else {
         remainingColor = '#f87171'; // red
-        remainingEmoji = '😭';
     }
 
     // Check if daily data has any spending
@@ -234,10 +230,11 @@ export default function Home() {
                     gradient={remaining < 0 ? 'var(--gradient-danger)' : 'var(--gradient-success)'}
                     delay={300}
                     valueColor={remainingColor}
-                    emoji={remainingEmoji}
+                    progress={progressPct}
+                    progressColor={remainingColor}
                 />
                 <SummaryCard
-                    icon={() => <img src="/Expense-Tracker/logo.png" alt="Net Balance Logo" style={{ width: '22px', height: '22px', borderRadius: '4px' }} />}
+                    icon={Scale}
                     label="Net Balance"
                     value={formatCurrency(netBalance)}
                     gradient={netBalance >= 0 ? 'var(--gradient-success)' : 'var(--gradient-danger)'}

@@ -18,14 +18,29 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 var(--spacing-xl);
+    padding: 0 var(--spacing-lg);
+}
+
+@media (max-width: 480px) {
+    .navbar-inner {
+        padding: 0 var(--spacing-md);
+    }
+
+    .logo-text {
+        font-size: var(--font-md);
+    }
+
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+    }
 }
 
 /* Logo */
 .navbar-logo {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     text-decoration: none;
     color: var(--text-primary);
     font-weight: 700;
@@ -33,35 +48,37 @@
 }
 
 .logo-icon {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .logo-text {
     letter-spacing: -0.5px;
+    white-space: nowrap;
 }
 
 .logo-accent {
     color: var(--color-primary-light);
 }
 
-/* Navbar Actions (Settings & Logout) */
+/* Navbar Actions (Settings & Toggle) */
 .navbar-actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .nav-action-btn {
     background: transparent;
     border: 1px solid transparent;
     color: var(--text-secondary);
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
@@ -75,7 +92,33 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
-.logout-action-btn:hover {
-    color: var(--danger-color, #ef4444);
-    background: rgba(239, 68, 68, 0.1);
+[data-theme="light"] .nav-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-nav-btn {
+    color: var(--color-warning);
+}
+
+/* Developer Chip */
+.nav-dev-chip {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    margin-left: var(--spacing-xs);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.nav-dev-chip:hover {
+    border-color: var(--color-primary-light);
+    color: var(--color-primary-light);
+    background: rgba(139, 92, 246, 0.1);
+    transform: scale(1.05);
 }

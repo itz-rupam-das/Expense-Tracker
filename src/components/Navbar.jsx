@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Settings, LogOut } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Code, Settings, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 export default function Navbar() {
-    const { signOut } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     return (
         <nav className="navbar" id="main-navbar">
@@ -17,12 +17,15 @@ export default function Navbar() {
                 </NavLink>
 
                 <div className="navbar-actions">
+                    <button onClick={toggleTheme} className="nav-action-btn theme-nav-btn" aria-label="Toggle theme">
+                        {theme === 'dark' ? <Moon size={22} /> : <Sun size={22} />}
+                    </button>
                     <NavLink to="/settings" className="nav-action-btn" aria-label="Settings">
                         <Settings size={22} />
                     </NavLink>
-                    <button onClick={signOut} className="nav-action-btn logout-action-btn" aria-label="Logout">
-                        <LogOut size={22} />
-                    </button>
+                    <NavLink to="/developer" className="nav-dev-chip" aria-label="Developer Profile">
+                        <Code size={18} />
+                    </NavLink>
                 </div>
             </div>
         </nav>

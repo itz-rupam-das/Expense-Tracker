@@ -266,7 +266,11 @@ export default function Wallet() {
                                     id="expense-type"
                                     className="input-field"
                                     value={formData.type}
-                                    onChange={(e) => handleChange('type', e.target.value)}
+                                    onChange={(e) => {
+                                        const newType = e.target.value;
+                                        handleChange('type', newType);
+                                        handleChange('category', newType === 'income' ? (settings.incomeCategories?.[0] || 'Salary') : (settings.categories[0] || 'Food'));
+                                    }}
                                 >
                                     <option value="expense">Expense</option>
                                     <option value="income">Income</option>
@@ -289,21 +293,19 @@ export default function Wallet() {
                                 />
                             </div>
 
-                            {formData.type !== 'income' && (
-                                <div className="form-group">
-                                    <label className="input-label" htmlFor="expense-category">Category</label>
-                                    <select
-                                        id="expense-category"
-                                        className="input-field"
-                                        value={formData.category}
-                                        onChange={(e) => handleChange('category', e.target.value)}
-                                    >
-                                        {settings.categories.map((cat) => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
+                            <div className="form-group">
+                                <label className="input-label" htmlFor="expense-category">Category</label>
+                                <select
+                                    id="expense-category"
+                                    className="input-field"
+                                    value={formData.category}
+                                    onChange={(e) => handleChange('category', e.target.value)}
+                                >
+                                    {(formData.type === 'income' ? (settings.incomeCategories || []) : settings.categories).map((cat) => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                            </div>
 
                             <div className="form-group">
                                 <label className="input-label" htmlFor="expense-date">Date</label>
@@ -394,7 +396,7 @@ export default function Wallet() {
                                 id="category-filter"
                             >
                                 <option value="All">All Categories</option>
-                                {settings.categories.map((cat) => (
+                                {[...new Set([...settings.categories, ...(settings.incomeCategories || [])])].map((cat) => (
                                     <option key={cat} value={cat}>{cat}</option>
                                 ))}
                             </select>
@@ -472,17 +474,15 @@ export default function Wallet() {
                                                 if (e.key === 'Escape') cancelInlineEdit();
                                             }}
                                         />
-                                        {(inlineData.type || 'expense') !== 'income' && (
-                                            <select
-                                                className="input-field inline-input"
-                                                value={inlineData.category}
-                                                onChange={(e) => setInlineData({ ...inlineData, category: e.target.value })}
-                                            >
-                                                {settings.categories.map((cat) => (
-                                                    <option key={cat} value={cat}>{cat}</option>
-                                                ))}
-                                            </select>
-                                        )}
+                                        <select
+                                            className="input-field inline-input"
+                                            value={inlineData.category}
+                                            onChange={(e) => setInlineData({ ...inlineData, category: e.target.value })}
+                                        >
+                                            {((inlineData.type || 'expense') === 'income' ? (settings.incomeCategories || []) : settings.categories).map((cat) => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
                                         <input
                                             type="date"
                                             className="input-field inline-input"
@@ -521,11 +521,9 @@ export default function Wallet() {
                                 <>
                                     <div className="expense-info">
                                         <div className="expense-main">
-                                            {(expense.type || 'expense') !== 'income' && (
-                                                <span className="expense-category-badge">
-                                                    {expense.category}
-                                                </span>
-                                            )}
+                                            <span className="expense-category-badge">
+                                                {expense.category}
+                                            </span>
                                             {expense.recurring && <span className="recurring-tag">🔄 Recurring</span>}
                                             {(expense.type || 'expense') === 'income' && (
                                                 <span className="income-tag">Income</span>

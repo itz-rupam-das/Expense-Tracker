@@ -11,6 +11,10 @@
     padding-bottom: env(safe-area-inset-bottom);
 }
 
+[data-theme="light"] .bottom-nav {
+    background: rgba(255, 255, 255, 0.85);
+}
+
 .bottom-nav-inner {
     display: flex;
     justify-content: space-around;
@@ -55,8 +59,7 @@
 
 .center-add-btn {
     position: absolute;
-    bottom: 15px;
-    /* Floats out of the nav container slightly */
+    bottom: 2px;
     width: 58px;
     height: 58px;
     border-radius: 50%;
