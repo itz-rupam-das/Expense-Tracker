@@ -9,11 +9,31 @@ export function AuthProvider({ children }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // Safety check for missing environment variables
+        if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+            console.error('Supabase environment variables are missing! The app will not function correctly.');
+            setIsLoading(false);
+            return;
+        }
+
+        // Safety timeout to prevent infinite loading state
+        const timer = setTimeout(() => {
+            if (isLoading) {
+                console.warn('Auth session check timed out.');
+                setIsLoading(false);
+            }
+        }, 5000);
+
         // Check active sessions and sets the user
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
             setIsLoading(false);
+            clearTimeout(timer);
+        }).catch(err => {
+            console.error('Error fetching session:', err);
+            setIsLoading(false);
+            clearTimeout(timer);
         });
 
         // Listen for changes on auth state (log in, log out, etc.)
@@ -23,7 +43,10 @@ export function AuthProvider({ children }) {
             setIsLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+            clearTimeout(timer);
+        };
     }, []);
 
     // Exposed functionality
