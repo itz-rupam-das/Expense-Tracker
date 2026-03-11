@@ -27,8 +27,7 @@ export default function Profile() {
     const imgRef = useRef(null);
     const [formData, setFormData] = useState({
         name: '',
-        avatarUrl: '',
-        bio: ''
+        avatarUrl: ''
     });
 
     useEffect(() => {
@@ -43,7 +42,7 @@ export default function Profile() {
     };
 
     const handleCancel = () => {
-        setFormData(settings.userProfile || { name: '', avatarUrl: '', bio: '' });
+        setFormData(settings.userProfile || { name: '', avatarUrl: '' });
         setImageSrc('');
         setIsEditing(false);
     };
@@ -150,8 +149,8 @@ export default function Profile() {
         }
     };
 
-    const displayName = settings.userProfile?.name || user?.email || 'User';
-    const displayAvatar = settings.userProfile?.avatarUrl;
+    const displayName = settings.userProfile?.name || user?.user_metadata?.full_name || user?.email || 'User';
+    const displayAvatar = settings.userProfile?.avatarUrl || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
     const initial = displayName.charAt(0).toUpperCase();
 
     return (
@@ -181,14 +180,6 @@ export default function Profile() {
                             <h3 className="user-email">{displayName}</h3>
                             {settings.userProfile?.name && <p className="user-member-email">{user?.email}</p>}
 
-                            <div className="user-bio-display">
-                                {settings.userProfile?.bio ? (
-                                    <p>{settings.userProfile.bio}</p>
-                                ) : (
-                                    <p className="empty-bio">No bio added yet.</p>
-                                )}
-                            </div>
-
                             <p className="user-member">Expense Tracker User</p>
 
                             <button onClick={signOut} className="btn-primary logout-btn-large">
@@ -202,8 +193,8 @@ export default function Profile() {
 
                             <div className="preview-top-container">
                                 <div className="user-avatar-large">
-                                    {formData.avatarUrl ? (
-                                        <img src={formData.avatarUrl} alt="Avatar" className="avatar-img" />
+                                    {formData.avatarUrl || user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                                        <img src={formData.avatarUrl || user?.user_metadata?.avatar_url || user?.user_metadata?.picture} alt="Avatar" className="avatar-img" />
                                     ) : (
                                         initial
                                     )}
@@ -273,17 +264,6 @@ export default function Profile() {
                                         </div>
                                     </div>
                                 )}
-                            </div>
-
-                            <div className="form-group">
-                                <label className="input-label">Bio Details</label>
-                                <textarea
-                                    className="input-field bio-textarea"
-                                    placeholder="Tell us a little about yourself..."
-                                    rows="3"
-                                    value={formData.bio}
-                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                                />
                             </div>
 
                             <div className="edit-actions">

@@ -14,7 +14,7 @@ const DEFAULT_SETTINGS = {
     categories: DEFAULT_CATEGORIES,
     incomeCategories: DEFAULT_INCOME_CATEGORIES,
     categoryBudgets: {},
-    userProfile: { name: '', avatarUrl: '', bio: '' }
+    userProfile: { name: '', avatarUrl: '' }
 };
 
 function loadFromStorage(key, defaultValue) {
@@ -126,13 +126,10 @@ export function ExpenseProvider({ children }) {
             }
 
             try {
-                // Fetch transactions and settings in parallel
                 const [txResponse, settingsResponse] = await Promise.all([
                     supabase.from('transactions').select('*').eq('user_id', user.id),
-                    supabase.from('user_settings').select('daily_limit, name, avatar_url, bio').eq('user_id', user.id).maybeSingle()
+                    supabase.from('user_settings').select('daily_limit, name, avatar_url').eq('user_id', user.id).maybeSingle()
                 ]);
-
-                if (txResponse.error) throw txResponse.error;
 
                 const mappedData = (txResponse.data || []).map(item => ({
                     ...item,
@@ -142,19 +139,41 @@ export function ExpenseProvider({ children }) {
                 dispatch({ type: 'SET_EXPENSES', payload: mappedData });
 
                 // If settings exist in DB, merge them into local state
-                if (settingsResponse.data) {
+                if (settingsResponse.data || !settingsResponse.error) {
+                    const dbName = settingsResponse.data?.name;
+                    const dbAvatar = settingsResponse.data?.avatar_url;
+                    const googleName = user.user_metadata?.full_name || '';
+                    const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+                    
+                    const finalName = dbName || googleName || '';
+                    const finalAvatar = dbAvatar || googleAvatar || '';
+                    const finalLimit = settingsResponse.data ? Number(settingsResponse.data.daily_limit) : DEFAULT_SETTINGS.dailyLimit;
+
+                    // If the DB is missing the row entirely, or missing name/avatar while Google has them, sync it to DB
+                    if (!settingsResponse.data || (!dbName && googleName) || (!dbAvatar && googleAvatar)) {
+                        const dbPayload = {
+                            user_id: user.id,
+                            daily_limit: finalLimit,
+                            name: finalName,
+                            avatar_url: finalAvatar
+                        };
+                        supabase.from('user_settings').upsert(dbPayload, { onConflict: 'user_id' })
+                            .then(({error}) => {
+                                if (error) console.error("Error auto-syncing settings:", error);
+                            });
+                    }
+
                     dispatch({
                         type: 'UPDATE_SETTINGS',
                         payload: {
-                            dailyLimit: Number(settingsResponse.data.daily_limit),
+                            dailyLimit: finalLimit,
                             userProfile: {
-                                name: settingsResponse.data.name || '',
-                                avatarUrl: settingsResponse.data.avatar_url || '',
-                                bio: settingsResponse.data.bio || ''
+                                name: finalName,
+                                avatarUrl: finalAvatar
                             }
                         }
                     });
-                } else if (settingsResponse.error) {
+                } else {
                     console.error("Error fetching settings:", settingsResponse.error);
                 }
             } catch (err) {
@@ -178,7 +197,13 @@ export function ExpenseProvider({ children }) {
             updates.incomeCategories = DEFAULT_INCOME_CATEGORIES;
         }
         if (!state.settings.userProfile) {
-            updates.userProfile = { name: '', avatarUrl: '', bio: '' };
+            updates.userProfile = { name: '', avatarUrl: '' };
+        } else if (user && (!state.settings.userProfile.name && !state.settings.userProfile.avatarUrl)) {
+            const googleName = user.user_metadata?.full_name || '';
+            const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+            if (googleName || googleAvatar) {
+                updates.userProfile = { name: googleName, avatarUrl: googleAvatar };
+            }
         }
         if (Object.keys(updates).length > 0) {
             dispatch({ type: 'UPDATE_SETTINGS', payload: updates });
@@ -326,7 +351,6 @@ export function ExpenseProvider({ children }) {
                 if (mergedSettings.userProfile) {
                     dbPayload.name = mergedSettings.userProfile.name || '';
                     dbPayload.avatar_url = mergedSettings.userProfile.avatarUrl || '';
-                    dbPayload.bio = mergedSettings.userProfile.bio || '';
                 }
 
                 const { error } = await supabase

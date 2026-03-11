@@ -71,22 +71,7 @@
     margin-bottom: var(--spacing-xs);
 }
 
-.user-bio-display {
-    margin: var(--spacing-md) 0;
-    padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: var(--radius-sm);
-    width: 100%;
-    max-width: 400px;
-    color: var(--text-secondary);
-    font-size: var(--font-md);
-    line-height: 1.6;
-}
 
-.empty-bio {
-    font-style: italic;
-    color: var(--text-muted);
-}
 
 .user-member {
     font-size: var(--font-sm);
@@ -127,10 +112,7 @@
     margin-bottom: var(--spacing-md);
 }
 
-.bio-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
+
 
 .avatar-upload-container {
     margin-top: var(--spacing-xs);
