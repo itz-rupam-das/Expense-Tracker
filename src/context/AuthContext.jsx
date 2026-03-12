@@ -59,13 +59,13 @@ export function AuthProvider({ children }) {
         signInWithGithub: () => supabase.auth.signInWithOAuth({ 
             provider: 'github',
             options: {
-                redirectTo: window.location.origin + (import.meta.env.BASE_URL || '/')
+                redirectTo: `${window.location.origin}${import.meta.env.BASE_URL || '/'}`
             }
         }),
         signInWithGoogle: () => supabase.auth.signInWithOAuth({ 
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + (import.meta.env.BASE_URL || '/')
+                redirectTo: `${window.location.origin}${import.meta.env.BASE_URL || '/'}`
             }
         }),
         signOut: () => supabase.auth.signOut(),
