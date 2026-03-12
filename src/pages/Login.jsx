@@ -5,10 +5,12 @@ import { Github, LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-    const { user, signInWithPassword, signUp, signInWithGithub, signInWithGoogle } = useAuth();
+    const { user, signInWithPassword, signUp, signInWithGoogle } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -23,6 +25,18 @@ export default function Login() {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
+
+        if (!isLogin) {
+            if (password !== confirmPassword) {
+                setError('Passwords do not match');
+                return;
+            }
+            if (!name.trim()) {
+                setError('Please enter your name');
+                return;
+            }
+        }
+
         setLoading(true);
 
         try {
@@ -30,7 +44,15 @@ export default function Login() {
                 const { error } = await signInWithPassword({ email, password });
                 if (error) throw error;
             } else {
-                const { error } = await signUp({ email, password });
+                const { error } = await signUp({ 
+                    email, 
+                    password,
+                    options: {
+                        data: {
+                            full_name: name.trim()
+                        }
+                    }
+                });
                 if (error) throw error;
                 setSuccessMessage('Check your email for the confirmation link.');
             }
@@ -45,25 +67,20 @@ export default function Login() {
         setError('');
         setSuccessMessage('');
         setLoading(true);
+
+        // Safety timeout in case redirection doesn't happen or window is closed
+        const timeout = setTimeout(() => {
+            setLoading(false);
+        }, 8000);
+
         try {
             const { error } = await signInWithGoogle();
             if (error) throw error;
+            // The page usually redirects, but if it doesn't, the timeout or success logic handles it
         } catch (err) {
             setError(err.message || 'An error occurred during Google authentication.');
             setLoading(false);
-        }
-    };
-
-    const handleGithubSignIn = async () => {
-        setError('');
-        setSuccessMessage('');
-        setLoading(true);
-        try {
-            const { error } = await signInWithGithub();
-            if (error) throw error;
-        } catch (err) {
-            setError(err.message || 'An error occurred during GitHub authentication.');
-            setLoading(false);
+            clearTimeout(timeout);
         }
     };
 
@@ -86,6 +103,20 @@ export default function Login() {
                 {successMessage && <div className="login-success">{successMessage}</div>}
 
                 <form className="login-form" onSubmit={handleSubmit}>
+                    {!isLogin && (
+                        <div className="login-form-group">
+                            <label className="input-label" htmlFor="name">Full Name</label>
+                            <input
+                                type="text"
+                                id="name"
+                                className="input-field"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter your full name"
+                                required
+                            />
+                        </div>
+                    )}
                     <div className="login-form-group">
                         <label className="input-label" htmlFor="email">Email</label>
                         <input
@@ -94,6 +125,7 @@ export default function Login() {
                             className="input-field"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            placeholder="your@email.com"
                             required
                         />
                     </div>
@@ -106,6 +138,7 @@ export default function Login() {
                                 className="input-field"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
                                 required
                             />
                             <button
@@ -118,6 +151,22 @@ export default function Login() {
                             </button>
                         </div>
                     </div>
+                    {!isLogin && (
+                        <div className="login-form-group">
+                            <label className="input-label" htmlFor="confirmPassword">Confirm Password</label>
+                            <div className="password-input-wrapper">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="confirmPassword"
+                                    className="input-field"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    )}
                     <button type="submit" className="btn-primary" disabled={loading}>
                         {loading ? 'Processing...' : (
                             isLogin ? <><LogIn size={18} /> Sign In</> : <><UserPlus size={18} /> Sign Up</>
@@ -143,15 +192,6 @@ export default function Login() {
                     Continue with Google
                 </button>
 
-                <button
-                    type="button"
-                    className="btn-primary github-btn"
-                    onClick={handleGithubSignIn}
-                    disabled={loading}
-                >
-                    <Github size={18} /> Continue with GitHub
-                </button>
-
                 <div className="login-footer">
                     {isLogin ? "Don't have an account?" : "Already have an account?"}
                     <button
@@ -160,6 +200,8 @@ export default function Login() {
                             setIsLogin(!isLogin);
                             setError('');
                             setSuccessMessage('');
+                            setName('');
+                            setConfirmPassword('');
                         }}
                     >
                         {isLogin ? 'Sign up' : 'Sign in'}

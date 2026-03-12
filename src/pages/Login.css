@@ -69,6 +69,19 @@
     gap: 0.5rem;
 }
 
+.login-form-group .input-label {
+    text-align: left;
+}
+
+.login-form .input-field {
+    text-align: left;
+}
+
+.login-form .btn-primary {
+    justify-content: center;
+    width: 100%;
+}
+
 .login-error {
     color: var(--danger-color, #ef4444);
     background: rgba(239, 68, 68, 0.1);
@@ -141,19 +154,6 @@
     margin-left: .5em;
 }
 
-.github-btn {
-    background: #24292e;
-    color: white;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.github-btn:hover {
-    background: #1b1f23;
-}
 
 .google-btn {
     background: #4285F4;
@@ -163,6 +163,7 @@
     justify-content: center;
     align-items: center;
     gap: 0.5rem;
+    width: 100%;
 }
 
 .google-btn:hover {
