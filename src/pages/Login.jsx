@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
+import { Github, LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-    const { user, signInWithPassword, signUp, signInWithGoogle } = useAuth();
+    const { user, signInWithPassword, signUp, signInWithGithub, signInWithGoogle } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -53,10 +54,22 @@ export default function Login() {
         }
     };
 
+    const handleGithubSignIn = async () => {
+        setError('');
+        setSuccessMessage('');
+        setLoading(true);
+        try {
+            const { error } = await signInWithGithub();
+            if (error) throw error;
+        } catch (err) {
+            setError(err.message || 'An error occurred during GitHub authentication.');
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="login-page">
-            <div className="login-left">
-                <div className="login-card glass-card">
+            <div className="login-card glass-card">
                 <div className="login-brand">
                     <div className="brand-logo">
                         <img src="/Expense-Tracker/logo.png" alt="Expense Tracker Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '16px' }} />
@@ -130,6 +143,15 @@ export default function Login() {
                     Continue with Google
                 </button>
 
+                <button
+                    type="button"
+                    className="btn-primary github-btn"
+                    onClick={handleGithubSignIn}
+                    disabled={loading}
+                >
+                    <Github size={18} /> Continue with GitHub
+                </button>
+
                 <div className="login-footer">
                     {isLogin ? "Don't have an account?" : "Already have an account?"}
                     <button
@@ -145,11 +167,5 @@ export default function Login() {
                 </div>
             </div>
         </div>
-        <div className="login-right">
-            <div className="spline-container">
-                <iframe src="https://my.spline.design/ailoginpagesplinehackathon-g3mCkSQuN9W0zd11TjWnntZg/" frameBorder="0" width="100%" height="100%" title="Spline Background"></iframe>
-            </div>
-        </div>
-    </div>
     );
 }

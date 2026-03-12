@@ -196,14 +196,11 @@ export function ExpenseProvider({ children }) {
         if (!state.settings.incomeCategories) {
             updates.incomeCategories = DEFAULT_INCOME_CATEGORIES;
         }
-        if (!state.settings.userProfile) {
-            updates.userProfile = { name: '', avatarUrl: '' };
-        } else if (user && (!state.settings.userProfile.name && !state.settings.userProfile.avatarUrl)) {
-            const googleName = user.user_metadata?.full_name || '';
-            const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
-            if (googleName || googleAvatar) {
-                updates.userProfile = { name: googleName, avatarUrl: googleAvatar };
-            }
+        if (!state.settings.userProfile || (!state.settings.userProfile.name && !state.settings.userProfile.avatarUrl)) {
+            updates.userProfile = { 
+                name: user?.user_metadata?.full_name || '', 
+                avatarUrl: user?.user_metadata?.avatar_url || user?.user_metadata?.picture || '' 
+            };
         }
         if (Object.keys(updates).length > 0) {
             dispatch({ type: 'UPDATE_SETTINGS', payload: updates });
