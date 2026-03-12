@@ -56,8 +56,18 @@ export function AuthProvider({ children }) {
         isLoading,
         signUp: (data) => supabase.auth.signUp(data),
         signInWithPassword: (data) => supabase.auth.signInWithPassword(data),
-        signInWithGithub: () => supabase.auth.signInWithOAuth({ provider: 'github' }),
-        signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google' }),
+        signInWithGithub: () => supabase.auth.signInWithOAuth({ 
+            provider: 'github',
+            options: {
+                redirectTo: window.location.origin + (import.meta.env.BASE_URL || '/')
+            }
+        }),
+        signInWithGoogle: () => supabase.auth.signInWithOAuth({ 
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + (import.meta.env.BASE_URL || '/')
+            }
+        }),
         signOut: () => supabase.auth.signOut(),
     };
 
