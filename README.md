@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <!-- Hero Banner -->
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=180&section=header&text=💰%20Personal%20Expense%20Tracker&fontSize=36&fontColor=ffffff&animation=fadeIn&fontAlignY=32&desc=Track%20•%20Analyze%20•%20Budget%20•%20Save&descSize=16&descAlignY=52" width="100%"/>
@@ -58,7 +58,6 @@
 💾 **JSON Data Backup & Restore**
 🎯 **Per-Category Monthly Budgets**
 📱 **Refined Mobile UI** (Less congestion, more focus)
-✉️ **Developer Feedback Form** (Quick mailto integration)
 
 </td>
 </tr>
@@ -193,8 +192,7 @@ src/
 │   ├── Wallet.jsx          # Transaction management
 │   ├── Reports.jsx         # Detailed analytics
 │   ├── Profile.jsx         # User profile & avatar management
-│   ├── Settings.jsx        # App preferences & budgets
-│   └── Developer.jsx       # Developer info & feedback form
+│   └── Settings.jsx        # App preferences & budgets
 │
 └── App.jsx                 # Routing & App entry
 ```
@@ -231,26 +229,3 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 ---
 
-<div align="center">
-
-## 👤 Developer
-
-<img src="https://github.com/itz-rupam-das.png" width="100" style="border-radius:50%"/>
-
-**Rupam Das**
-BCA Student — MAKAUT
-
-<a href="https://github.com/itz-rupam-das"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" /></a>
-<a href="https://www.linkedin.com/in/rupam-das-kolkata"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
-<a href="https://www.instagram.com/itz_rupam_das"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" /></a>
-<a href="mailto:rdas40978@gmail.com"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" /></a>
-
-<br/><br/>
-
-⭐ **If you found this useful, give it a star!** ⭐
-
-<br/>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer" width="100%"/>
-
-</div>

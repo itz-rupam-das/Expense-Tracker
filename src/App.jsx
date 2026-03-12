@@ -10,7 +10,6 @@ import Home from './pages/Home';
 import Wallet from './pages/Wallet';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
-import Developer from './pages/Developer';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import './App.css';
@@ -72,7 +71,6 @@ function AppContent() {
                     <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
                     <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                    <Route path="/developer" element={<ProtectedRoute><Developer /></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 </Routes>
             </main>

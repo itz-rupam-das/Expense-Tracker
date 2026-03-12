@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Code, Settings, Sun, Moon } from 'lucide-react';
+import { Settings, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
@@ -22,9 +22,6 @@ export default function Navbar() {
                     </button>
                     <NavLink to="/settings" className="nav-action-btn" aria-label="Settings">
                         <Settings size={22} />
-                    </NavLink>
-                    <NavLink to="/developer" className="nav-dev-chip" aria-label="Developer Profile">
-                        <Code size={18} />
                     </NavLink>
                 </div>
             </div>
